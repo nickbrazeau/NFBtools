@@ -332,7 +332,7 @@ bamCov2SmplRaster <- function(input=NULL){
     grid::grid.newpage()
     gridExtra::grid.arrange(grobs = grobs, layout_matrix = rbind(c(rep(1,10), NA, rep(3,10)),
                                                                  c(rep(2,10), NA, rep(3,10)),
-                                                                 c(rep(NA,21)), # white space at end
+                                                                 c(rep(NA,21)) # white space at end
 
     )
     )
