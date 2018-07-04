@@ -20,7 +20,7 @@ bedtoolsgenomecov2bamCov <- function(gencovdir = NULL, lvls = c(1,5,10,25,50,75,
 
   gencovfiles <- dir(gencovdir, full.names = T)
 
-  retlist_all <- lapply(gencovfiles, function(file){
+  retlist_all <- parallel::mclapply(gencovfiles, function(file){
     dat <- read_tsv(file, col_names = F)
     colnames(dat) <- c("CHROM", "POS", "depth")
     datchromlist <- split(x = dat, f=factor(dat$CHROM))
@@ -318,10 +318,12 @@ bamCov2SmplRaster <- function(input=NULL){
         1, 1, 1, ncol(p2))
     # plot 3
       p3 <- SmplChromCovlist[[smpl]]
-
+    # plot 4 white space - https://stackoverflow.com/questions/21529926/arrange-ggplots-together-in-custom-ratios-and-spacing
+    blank <-rectGrob(gp=gpar(col="white")) # make a white spacer grob
     ret <- list(p1,
                 p2,
-                p3)
+                p3,
+                blank)
     return(ret)
 
   })
@@ -332,7 +334,7 @@ bamCov2SmplRaster <- function(input=NULL){
     grid::grid.newpage()
     gridExtra::grid.arrange(grobs = grobs, layout_matrix = rbind(c(rep(1,10), NA, rep(3,10)),
                                                                  c(rep(2,10), NA, rep(3,10)),
-                                                                 c(rep(NA,21)) # white space at end
+                                                                 c(rep(4,21))
 
     )
     )
