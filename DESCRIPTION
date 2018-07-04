@@ -20,7 +20,9 @@ Imports:
     RColorBrewer,
     viridis,
     prettydoc,
+    grid,
     gridExtra,
+    gtable,
     ggpubr,
     vcfR,
     seqinr

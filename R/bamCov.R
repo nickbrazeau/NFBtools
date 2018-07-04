@@ -168,7 +168,7 @@ bamCov2OverallPercCov <- function(input = NULL){
           )
 
 
-  plot(plotObj)
+  return(plotObj)
 
 }
 
