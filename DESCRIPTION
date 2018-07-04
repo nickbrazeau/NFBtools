@@ -11,6 +11,7 @@ BugReports: https://github.com/nickbrazeau/NFBtools/issues
 Description: R package for genomic analyses commonly used by the IDEEL group
 LazyData: TRUE
 Depends: R (>= 3.3.0)
+bioc_packages: BiocInstaller
 Imports:
     tidyverse,
     stringr,
