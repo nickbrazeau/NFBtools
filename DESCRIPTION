@@ -22,7 +22,8 @@ Imports:
     gridExtra,
     ggpubr,
     vcfR,
-    seqinr,
+    seqinr
+biocViews:
     Biostrings
 Suggests:
     knitr,
