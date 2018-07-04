@@ -6,7 +6,7 @@
 #'
 #' @export
 
-skdp_filter_simplifier <- function(skdpclustinfo_df, readcountcutoff = 0){
+SeekDeepOutput2SeekDeepDat <- function(skdpclustinfo_df, readcountcutoff = 0){
   # Drops clusters without a lot of read support and recalculates haplotype/cluster fractions.
   #
   # Args:
@@ -36,10 +36,10 @@ skdp_filter_simplifier <- function(skdpclustinfo_df, readcountcutoff = 0){
     skdpclustinfo_df_simp <- skdpclustinfo_df_simp[, colnames(skdpclustinfo_df_simp) %in% c("s_Sample", "c_AveragedFrac_adj", "h_popUID", "c_Consensus", "filtered_c_ReadCnt_denom", "c_ReadCnt")] # keep specific columns
 
   } else{
-    skdpclustinfo_df_simp <- NULL
+    stop("There was an error filtering the reads. Contact the developer")
   }
 
-
+  class(skdpclustinfo_df_simp) <- "SeekDeepDat"
   return(skdpclustinfo_df_simp)
 
 
@@ -48,18 +48,26 @@ skdp_filter_simplifier <- function(skdpclustinfo_df, readcountcutoff = 0){
 
 #---------------------------------------------------------------------------------
 
-#' @title sampleplotter
+#' @title SeekDeepDat2HapPlotter
 #'
 #' @description plots
 #'
-#' @param skdpclustinfo_df_simp from skdp_filter_simplifier
+#' @param input from skdp_filter_simplifier
 #'
 #' @export
 
-sampleplotter <- function(skdpclustinfo_df_simp, target="Target"){
+SeekDeepDat2HapPlotter <- function(input, target="Target"){
 
-  # Color setup from stackoverflow
-  require(RColorBrewer) # https://stackoverflow.com/questions/15282580/how-to-generate-a-number-of-most-distinctive-colors-in-r
+  # error handle
+  if(class(input) != "SeekDeepDat"){
+    stop("Input must be of class SeekDeepDat See the SeekDeepOutput2SeekDeepDat function.")
+  }
+
+
+  skdpclustinfo_df_simp <- input # NFB fix this to input throughout...
+
+  # Color setup
+  # stackoverflow, # https://stackoverflow.com/questions/15282580/how-to-generate-a-number-of-most-distinctive-colors-in-r
   n <- length(unique(skdpclustinfo_df_simp$h_popUID))
   qual_col_pals = brewer.pal.info[brewer.pal.info$category == 'qual',] # pul out qualitative paletes
   col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
@@ -97,7 +105,7 @@ sampleplotter <- function(skdpclustinfo_df_simp, target="Target"){
 
 #---------------------------------------------------------------------------------
 
-#' @title seekdeep_annotator_exons
+#' @title SeekDeepDat2ExonAnnotation
 #'
 #' @description annotates exons
 #'
@@ -105,7 +113,7 @@ sampleplotter <- function(skdpclustinfo_df_simp, target="Target"){
 #'
 #' @export
 
-seekdeep_annotator_exons <- function(skdpclustinfo_df_simp,
+SeekDeepDat2ExonAnnotation <- function(input,
                                      gff, geneid,
                                      ampliconrefseqpath, forwardprimerpath, reverseprimerpath,
                                      ncbigeneticcode=1){
@@ -124,6 +132,14 @@ seekdeep_annotator_exons <- function(skdpclustinfo_df_simp,
   #  annotated df
 
 
+
+  # error handle
+  if(class(input) != "SeekDeepDat"){
+    stop("Input must be of class SeekDeepDat See the SeekDeepOutput2SeekDeepDat function.")
+  }
+
+
+  skdpclustinfo_df_simp <- input # NFB fix this to input throughout...
 
 
   #####  READ IN GFF GENE INFORMATION
@@ -208,7 +224,7 @@ seekdeep_annotator_exons <- function(skdpclustinfo_df_simp,
     ###    from "global" Gene Fasta          ###
     ############################################
 
-    RefSeqGenePos <- matchPattern(pattern = Pf3D7haplotypeRef[[1]],
+    RefSeqGenePos <- BioStrings::matchPattern(pattern = Pf3D7haplotypeRef[[1]],
                                   subject = DNAString(seqinr::c2s(gffseq[[1]]))) # find pos of amplicon in gene
 
 

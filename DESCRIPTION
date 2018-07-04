@@ -1,12 +1,47 @@
 Package: NFBtools
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Miscellaneous tools for the IDEEL group
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Authors@R: c(
+    person(c("Nicholas", "F"), "Brazeau", role = c("aut", "cre"), email = "nbrazeau@med.unc.edu")
+    )
+Maintainer: Nicholas F Brazeau <nbrazeau@med.unc.edu>
+URL: https://github.com/nickbrazeau/NFBtools
+BugReports: https://github.com/nickbrazeau/NFBtools/issues
+Description: R package for genomic analyses commonly used by the IDEEL group
+LazyData: TRUE
+Depends: R (>= 3.3.0)
+bioc_packages: BiocInstaller
+Imports:
+    tidyverse,
+    stringr,
+    zoo,
+    parallel,
+    RColorBrewer,
+    viridis,
+    prettydoc,
+    grid,
+    gridExtra,
+    gtable,
+    ggpubr,
+    vcfR,
+    seqinr
+biocViews:
+    Biostrings
+Suggests:
+    knitr,
+    testthat,
+    devtools,
+    microbenchmark,
+    rmarkdown,
+    covr
+LinkingTo:
+    Rcpp,
+    RcppParallel
+SystemRequirements:
+    C++11,
+    GNU make
+License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
-Suggests: covr
+RoxygenNote: 6.0.1
+VignetteBuilder: knitr
