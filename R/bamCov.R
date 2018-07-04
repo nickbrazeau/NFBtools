@@ -319,7 +319,7 @@ bamCov2SmplRaster <- function(input=NULL){
     # plot 3
       p3 <- SmplChromCovlist[[smpl]]
     # plot 4 white space - https://stackoverflow.com/questions/21529926/arrange-ggplots-together-in-custom-ratios-and-spacing
-    blank <-rectGrob(gp=gpar(col="white")) # make a white spacer grob
+    blank <- grid::rectGrob(gp=gpar(col="white")) # make a white spacer grob
     ret <- list(p1,
                 p2,
                 p3,
