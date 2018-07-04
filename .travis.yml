@@ -4,6 +4,10 @@ language: R
 sudo: false
 cache: packages
 use_bioc: true
+r: bioc-devel
+warnings_are_errors: false
+
+bioc_required: true
 
 after_success:
   - Rscript -e 'covr::codecov()'
