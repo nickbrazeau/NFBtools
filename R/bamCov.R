@@ -332,8 +332,8 @@ bamCov2SmplRaster <- function(input=NULL){
 # plot the grobs
   lapply(grobsrelist, function(grobs){
     grid::grid.newpage()
-    gridExtra::grid.arrange(grobs = grobs, layout_matrix = rbind(c(rep(1,10), NA, rep(3,10)),
-                                                                 c(rep(2,10), NA, rep(3,10)),
+    gridExtra::grid.arrange(grobs = grobs, layout_matrix = rbind(rep(c(rep(1,10), NA, rep(3,10)), 3),
+                                                                 rep(c(rep(2,10), NA, rep(3,10)), 3),
                                                                  c(rep(4,21))
 
     )
