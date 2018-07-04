@@ -301,7 +301,7 @@ bamCov2SmplRaster <- function(input=NULL){
 
 
 # relist and make each sample its own grob of 3 plot objs
-  grobsrelist <- lapply(names(windowcovlist), function(smpl){
+  grobsrelist <- lapply(smpls, function(smpl){
     # plot 1
       p1 <- SmplPercCovlist[[smpl]]
     # summary table (i.e. plot 2)        #https://stackoverflow.com/questions/11774703/adding-text-to-a-grid-table-plot/11775211#11775211
@@ -315,7 +315,7 @@ bamCov2SmplRaster <- function(input=NULL){
       p2 <- gtable::gtable_add_grob(
         p2,
         list(title),
-        1, 1, 1, ncol(table))
+        1, 1, 1, ncol(p2))
     # plot 3
       p3 <- SmplChromCovlist[[smpl]]
 
