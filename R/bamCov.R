@@ -194,7 +194,7 @@ bamCov2SmplPercCov <- function(chromlistcovpercdf = NULL){
     geom_dotplot(aes(x=CHROM, y=val, fill=covdepth), binaxis='y', stackdir='center', alpha=0.5) +
     geom_vline(aes(xintercept = as.numeric(CHROM)), linetype="dashed", colour = "#bdbdbd") +
     scale_fill_manual("x-Fold \nCoverage", values = brewer.pal(n = length(levels((factor(chromlistcovpercdf$covdepth)))), name = "Set2")) +
-    ggtitle(paste("Coverage by Chromosome for Sample", dat$smpl[1])) +
+    ggtitle(paste("Coverage by Chromosome for Sample", chromlistcovpercdf$smpl[1])) +
     xlab("Chromosome") + ylab("Proportion of Chromosome Covered") +
     theme(plot.title = element_text(hjust = 0.5, family="Arial", size=17, face = "bold"),
           axis.text.x = element_text(family="Arial", size=13, face = "bold", angle=90, vjust=0.5),
