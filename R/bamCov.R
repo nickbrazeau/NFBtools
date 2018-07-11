@@ -4,7 +4,7 @@
 #' not exported
 
 calcCovperc <- function(depth, ttlbp, lvl){
-  ret <- sum(depth > lvl)/ttlbp
+  ret <- sum(depth >= lvl)/ttlbp
   names(ret) <- paste0(lvl, "x")
   return(ret)
 }
@@ -21,10 +21,13 @@ bedtoolsgenomecov2bamCov <- function(gencovdir = NULL, lvls = c(1,5,10,25,50,75,
   gencovfiles <- dir(gencovdir, full.names = T)
 
   retlist_all <- parallel::mclapply(gencovfiles, function(file){
-    dat <- read_tsv(file, col_names = F)
+    dat <- readr::read_tsv(file, col_names = F)
     colnames(dat) <- c("CHROM", "POS", "depth")
     datchromlist <- split(x = dat, f=factor(dat$CHROM))
     ttlbp <- sum(unlist(lapply(datchromlist, function(x) return(max(x$POS)))))
+    if(ttlbp != nrow(dat)){
+      stop("Total Base-pairs calculated does not equal rows from Bedtools GenomeCov. Error in how file was generated from Bedtools.")
+    }
 
 
     ## genome coordinates
@@ -90,8 +93,11 @@ bedtoolsgenomecov2bamCov <- function(gencovdir = NULL, lvls = c(1,5,10,25,50,75,
       )
 
     ## Percentage of Chromosome Covered by levels
-    chromlistcovperc <- parallel::mclapply(datchromlist, function(df){
-      sapply(lvls, calcCovperc, depth=df$depth, ttlbp=ttlbp)
+    chromlistcovperc <- parallel::mclapply(datchromlist,
+                                           function(df){
+                                             chrombp = nrow(df)
+                                             ret <- sapply(lvls, calcCovperc, depth=df$depth, ttlbp=chrombp)
+                                             return(ret)
 
     }
     )
