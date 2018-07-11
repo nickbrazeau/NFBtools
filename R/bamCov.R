@@ -253,7 +253,7 @@ bamCov2SmplChromCov <- function(genomcoordsdf = NULL, windowcovdf = NULL){
     geom_rect(data=genomcoordsdf, aes(xmin=start, xmax=end, ymin=CHROM_num-0.25, ymax=CHROM_num+0.25), fill="#d9d9d9", color="#d9d9d9") +
     geom_rect(data=windowcovdf, aes(xmin=start, xmax=end, ymin=CHROM_num-0.2, ymax=CHROM_num+0.2, fill=meancov)) +
     scale_fill_gradientn("Mean \n Coverage", colours = c("#313695", "#ffffbf", "#d53e4f")) +
-    scale_y_continuous(breaks = 1:nrow(genomcoordsdf), labels=rev(levels(factor(genomcoordsdf$CHROM)))) +  # need to reverse since highest number is at top, which is farthest in index
+    scale_y_continuous(breaks = 1:nrow(genomcoordsdf), labels=chromnumdf$CHROM) +
     ggtitle(paste("Mean Coverage with a ", windowcovdf$end[1] - windowcovdf$start[1], " base-pair Sliding Window \n by Chromosome for Sample:", windowcovdf$smpl[1])) +
     xlab("Chromosome Position") + ylab("Chromosome") +
     theme(plot.title = element_text(hjust = 0.5, family="Arial", size=17, face = "bold"),
