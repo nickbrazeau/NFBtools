@@ -163,15 +163,18 @@ if(!is.null(infoReadPosRankSum)){
 # apply filter
 #--------------------------------------------------------
 
-infodf <- infodf[ , colnames(infodf) %in% c("CHROM", "POS", "Indiv", infolist) ]
-infodf <- infodf %>%
-  dplyr::mutate(excl = apply(., 1, function(x){any(x == "DROP")})) %>%
-  dplyr::select(CHROM, POS, Indiv, excl) %>%
-  tidyr::spread(., key="Indiv", value="excl") %>%
-  dplyr::select(-c(ChromKey, POS)) %>%
-  cbind(FORMAT=rep(FALSE, nrow(.)), .)
+infodf <- infodf[ , colnames(infodf) %in% c("CHROM", "POS", infolist) ]
+passedloci <- infodf %>%
+  dplyr::mutate(CHROMPOS = paste0(CHROM, POS)) %>%
+  dplyr::mutate(excl = apply(., 1, function(x){all(x != "DROP")})) %>%
+  dplyr::select(excl)
 
-vcf@gt[as.matrix(infodf)] <- NA# Setting class based off of vcfR documentation https://github.com/knausb/vcfR/blob/master/R/AllClass.R
+vcf@gt <- vcf@gt[passedloci,]
+
+fix <- as.matrix(vcfR::getFIX(vcfRobj, getINFO = T)[passedloci,])
+gt <- as.matrix(vcfRobj@gt)
+meta <- append(vcfRobj@meta, paste("##Additional Filters for INFO column"))
+
 newvcfR <- new("vcfR", meta = meta, fix = fix, gt = gt)
 
 newvcfR
@@ -255,7 +258,7 @@ vcffilter_format <- function(vcfRobject = NULL,
     dplyr::mutate(excl = apply(., 1, function(x){any(x == "DROP")})) %>%
     dplyr::select(CHROM, POS, Indiv, excl) %>%
     tidyr::spread(., key="Indiv", value="excl") %>%
-    dplyr::select(-c(ChromKey, POS)) %>%
+    dplyr::select(-c(CHROM, POS)) %>%
     cbind(FORMAT=rep(FALSE, nrow(.)), .)
 
   vcf@gt[as.matrix(formatdf)] <- NA
