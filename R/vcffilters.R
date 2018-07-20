@@ -201,7 +201,7 @@ vcffilter_format <- function(vcfRobject = NULL,
                              formatSP = NULL,
                              prop.loci.missing = 0.5, # this is given a loci, how many samples can have missing information before it is dropped
                              biallelic = TRUE,
-                             SNPs = FALSE, ...){
+                             SNPs = FALSE){
 
   require(vcfR)
   require(tidyverse)
@@ -253,12 +253,12 @@ vcffilter_format <- function(vcfRobject = NULL,
   # apply filter
   #--------------------------------------------------------
 
-  formatdf <- formatdf[ , colnames(formatdf) %in% c("CHROM", "POS", "Indiv", formatlist) ]
+  formatdf <- formatdf[ , colnames(formatdf) %in% c("ChromKey", "POS", "Indiv", formatlist) ]
   formatdf <- formatdf %>%
     dplyr::mutate(excl = apply(., 1, function(x){any(x == "DROP")})) %>%
-    dplyr::select(CHROM, POS, Indiv, excl) %>%
+    dplyr::select(ChromKey, POS, Indiv, excl) %>%
     tidyr::spread(., key="Indiv", value="excl") %>%
-    dplyr::select(-c(CHROM, POS)) %>%
+    dplyr::select(-c(ChromKey, POS)) %>%
     cbind(FORMAT=rep(FALSE, nrow(.)), .)
 
   vcf@gt[as.matrix(formatdf)] <- NA
