@@ -293,14 +293,27 @@ vcffilter_format <- function(vcfRobject = NULL,
 #------------------------------------------------------
 
 vcfR2segsites <- function(vcfRobj = NULL, err = 0.025){
-  f_vcfAD <- vcfR::AD_frequency(vcfR::extract.gt(vcfRobj, element="AD"))
-  if(any(is.na(f_vcfAD))){
-    stop("There are NA values in your vcf matrix. Do you have sites that are not biallelic? If so, parsing will not work.")
+  vcf <- vcfRobj # legacy
+  if(!identical(vcf, vcf[is.biallelic(vcf)])){
+    stop("VCF must be biallelic for this to work.")
   }
-  segsites <- apply(f_vcfAD, 1, function(x){
-    !all(x <= (err + median(x)) & (x >= (err - median(x))))
-  }
-  )
+
+  ad <- vcfR::extract.gt(vcf, element = "AD")
+  refad <- masplit(ad, record=1, sort=0, decreasing = 0)
+  altad <- masplit(ad, record=2, sort=0, decreasing = 0)
+
+  NRAF <- altad/(altad + refad)
+  NRAF[is.nan(NRAF)] <- NA # the 0,0 are returning Nans
+
+  segsites <- apply(NRAF, 1, function(x){
+      if(all(is.na(x))){
+        return(FALSE)
+      } else {
+        return( (max(x, na.rm=T) - min(x, na.rm=T)) > err )
+
+      }
+
+  })
 
   vcfRobj@gt <- vcfRobj@gt[segsites,]
 
