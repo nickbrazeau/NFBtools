@@ -169,9 +169,9 @@ passedloci <- infodf %>%
   dplyr::mutate(excl = apply(., 1, function(x){all(x != "DROP")})) %>%
   dplyr::select(excl)
 
-vcf@gt <- vcf@gt[passedloci,]
+vcf@gt <- vcf@gt[unlist(passedloci),]
 
-fix <- as.matrix(vcfR::getFIX(vcfRobj, getINFO = T)[passedloci,])
+fix <- as.matrix(vcfR::getFIX(vcfRobj, getINFO = T)[unlist(passedloci),])
 gt <- as.matrix(vcfRobj@gt)
 meta <- append(vcfRobj@meta, paste("##Additional Filters for INFO column"))
 
