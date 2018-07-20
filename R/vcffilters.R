@@ -172,8 +172,8 @@ passedloci <- infodf %>%
 vcf@gt <- vcf@gt[unlist(passedloci),]
 
 fix <- as.matrix(vcfR::getFIX(vcfRobject, getINFO = T)[unlist(passedloci),])
-gt <- as.matrix(vcfRobj@gt)
-meta <- append(vcfRobj@meta, paste("##Additional Filters for INFO column"))
+gt <- as.matrix(vcfRobject@gt)
+meta <- append(vcfRobject@meta, paste("##Additional Filters for INFO column"))
 
 newvcfR <- new("vcfR", meta = meta, fix = fix, gt = gt)
 
