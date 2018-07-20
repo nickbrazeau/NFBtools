@@ -169,12 +169,13 @@ passedloci <- infodf %>%
   dplyr::mutate(excl = apply(., 1, function(x){all(x != "DROP")})) %>%
   dplyr::select(excl)
 
-vcf@gt <- vcf@gt[unlist(passedloci),]
+passedloci <- passedloci$excl
 
-fix <- as.matrix(vcfR::getFIX(vcfRobject, getINFO = T)[unlist(passedloci),])
-gt <- as.matrix(vcfRobject@gt)
-meta <- append(vcfRobject@meta, paste("##Additional Filters for INFO column"))
+fix <- as.matrix(vcfR::getFIX(vcf, getINFO = T)[ passedloci ,])
+gt <- as.matrix(vcf@gt[ passedloci , ])
+meta <- append(vcf@meta, "##Additional Filters provided by NFB filter tools")
 
+# Setting class based off of vcfR documentation https://github.com/knausb/vcfR/blob/master/R/AllClass.R
 newvcfR <- new("vcfR", meta = meta, fix = fix, gt = gt)
 
 newvcfR
