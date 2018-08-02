@@ -58,7 +58,7 @@ wicalc <- function(NRAFdf, window=50){
     dplyr::mutate(Rsq = R^2 ) %>%
     dplyr::group_by(POS) %>%
     dplyr::summarise(Rsqsum = sum(Rsq)) %>%
-    dplyr::mutate(wi = 1 / (1 + Rsqsum) )
+    dplyr::mutate(wi = 1 / (1 + Rsqsum) ) # TODO speed this up
 
   return(widf)
 }
@@ -109,7 +109,7 @@ vcfR2Fw_pairwisegendist <- function(vcfRobject = NULL, biallelicsnps=TRUE, segsi
   NRAF <- altad/(altad + refad)
   NRAF[is.nan(NRAF)] <- NA #TODO fix that the 0,0 are returning Nans, the NA right now is a bit sloppy
 
-  # get chrom & pos for coordinate information and to split by chrom for parallelization
+  # get chrom & pos for coordinate information and make LD calculations not possible/independent between chromosomes
   NRAFdf <- vcfR::getFIX(vcfRobject) %>%
     as.tibble(.) %>%
     dplyr::select(CHROM, POS) %>%
@@ -131,7 +131,12 @@ vcfR2Fw_pairwisegendist <- function(vcfRobject = NULL, biallelicsnps=TRUE, segsi
   # calculations
   #--------------------------------------------------------
 
+  # pairings
   pairs.list <- split(pairs, seq(nrow(pairs)))
+
+  # just need a vector of the wi results
+  wiret <- do.call("rbind", wi)$wi
+
 
   AFlist <- parallel::mclapply(pairs.list, function(x){
     ret <- NRAF[ , colnames(NRAF) %in% x ]
@@ -142,7 +147,7 @@ vcfR2Fw_pairwisegendist <- function(vcfRobject = NULL, biallelicsnps=TRUE, segsi
   dablist <- lapply(AFlist, function(afmatpair){
     pair <- colnames(afmatpair)
     dabret <- dab(afmatpair)
-    dabret <- 1/length(dabret) * sum( (dabret * wi$Pf3D7_01_v3$wi) ) # FIXME need to figure out this chromsomes issue
+    dabret <- 1/length(dabret) * sum( (dabret * wiret) )
 
     ret <- cbind.data.frame(pair[1], pair[2], dabret)
     return(ret)
