@@ -1,4 +1,42 @@
+#' @title vcfR2SubsetChrom
+#'
+#' @description Produces a subsetted \code{vcfR} based on chromosome
+#'
+#' @export
+
+vcfR2SubsetChrom <- function(vcfRobject = NULL,
+                             chromvect = NULL){
+
+  vcftidy <- vcfR2tidy(vcfRobject)
+
+  passchrom <- vcftidy$fix %>%
+    dplyr::select(CHROM) %>%
+    dplyr::mutate( keep = ifelse(CHROM %in% chromvect, TRUE, FALSE) ) %>%
+    dplyr::select(keep) %>%
+    as.matrix(.)
+
+
+
+  meta <- append(vcfRobject@meta, paste("##Chromsomes were subsetted"))
+  fix <- vcfRobject@fix[ passchrom, ]
+  gt <- vcfRobject@gt[ passchrom, ]
+
+
+  # Setting class based off of vcfR documentation https://github.com/knausb/vcfR/blob/master/R/AllClass.R
+  newvcfR <- new("vcfR", meta = meta, fix = fix, gt = gt)
+
+  newvcfR
+
+}
+
+
+
+
 #' @title vcfR2vcffilter_CHROMPOS
+#'
+#' @description Produces a subsetted \code{vcfR} with specific loci excluded as determined \code{chromposdf}.
+#'
+#' @param chromposdf an dataframe that contains loci to be excluded and has been produced by \code{GFF2VariantAnnotation_Short}
 #'
 #'
 #' @export
@@ -16,9 +54,6 @@ vcffilter_CHROMPOS <- function(vcfRobject = NULL,
 
     temp <- tibble::tibble(CHROM = rep(dat$seqname, i),
                            POS = seq(from=dat$start, to=dat$end),
-                           info = rep(dat$info, i),
-                           GeneID = rep(dat$GeneID, i),
-                           Description = rep(dat$Description),
                            remove = rep("Y", i)
     )
     return(temp)
@@ -30,7 +65,7 @@ vcffilter_CHROMPOS <- function(vcfRobject = NULL,
 
   passloci <- vcftidy$fix %>%
     dplyr::select(CHROM, POS) %>%
-    dplyr::left_join(x=., y=chromposlong) %>%
+    dplyr::left_join(x=., y=chromposlong, by=c("CHROM", "POS")) %>%
     dplyr::mutate(keep = ifelse(is.na(remove), TRUE, FALSE)) %>%
     dplyr::select(keep) %>%
     as.matrix(.)
@@ -50,6 +85,7 @@ vcffilter_CHROMPOS <- function(vcfRobject = NULL,
 
 #' @title vcfR2vcffilter_INFO
 #'
+#' @param infoDP options is based on a percentile cutoff. As a result, if you specify 0.1, the top and bottom 10th read depth percentiles will be excluded
 #'
 #' @export
 
@@ -72,7 +108,7 @@ vcffilter_info <- function(vcfRobject = NULL,
                            infoMQRankSum = NULL,
                            infoReadPosRankSum = NULL,
                            biallelic = TRUE,
-                           SNPs = FALSE){
+                           SNPs = TRUE){
 
   require(vcfR)
   require(tidyverse)
@@ -143,7 +179,7 @@ if(!is.null(infoAF)){
 if(!is.null(infoDP)){
   DPpercentile <- quantile(infodf$DP, c(infoDP, 1-infoDP))
   infodf <- infodf %>%
-    dplyr::mutate(DP = ifelse(DP >= DPpercentile[1] & DP <= DPpercentile[2],
+    dplyr::mutate(DP = ifelse(DPpercentile[1] < DP & DP < DPpercentile[2],
                               DP, "DROP"))
 }
 if(!is.null(infoFS)){
@@ -166,10 +202,10 @@ if(!is.null(infoReadPosRankSum)){
 infodf <- infodf[ , colnames(infodf) %in% c("CHROM", "POS", infolist) ]
 passedloci <- infodf %>%
   dplyr::mutate(CHROMPOS = paste0(CHROM, POS)) %>%
-  dplyr::mutate(excl = apply(., 1, function(x){all(x != "DROP")})) %>%
-  dplyr::select(excl)
+  dplyr::mutate(incl = apply(., 1, function(x){! any(x == "DROP") })) %>%
+  dplyr::select(incl)
 
-passedloci <- passedloci$excl
+passedloci <- passedloci$incl
 
 fix <- as.matrix(vcfR::getFIX(vcf, getINFO = T)[ passedloci ,])
 gt <- as.matrix(vcf@gt[ passedloci , ])
@@ -185,12 +221,9 @@ newvcfR
 
 
 
-
-
-
 #' @title vcfR2vcffilter_FORMAT
 #'
-#'
+#' @param prop.loci.missing Given a loci, how many samples can have missing information before that loci is dropped
 #' @export
 
 #-----------------------------------------------------
@@ -269,7 +302,7 @@ vcffilter_format <- function(vcfRobject = NULL,
   #--------------------------------------------------------
   if(!is.null(prop.loci.missing)){
     locimissingness <- apply(vcf@gt, 1, function(x){sum(is.na(x))})
-    locimissingnessprop <- locimissingness/(ncol(vcf@gt)-1)
+    locimissingnessprop <- locimissingness/(ncol(vcf@gt)-1) # -1 for the format column
 
 
     # filter loci with too much missing information
@@ -296,8 +329,8 @@ vcffilter_format <- function(vcfRobject = NULL,
 # Read vcfR object to segregated sites
 #------------------------------------------------------
 
-vcfR2segsites <- function(vcfRobj = NULL, err = 0.025){
-  vcf <- vcfRobj # legacy
+vcfR2segsites <- function(vcfRobject = NULL, err = 0.025){
+  vcf <- vcfRobject # legacy
   if(!identical(vcf, vcf[is.biallelic(vcf)])){
     stop("VCF must be biallelic for this to work.")
   }
@@ -319,11 +352,11 @@ vcfR2segsites <- function(vcfRobj = NULL, err = 0.025){
 
   })
 
-  vcfRobj@gt <- vcfRobj@gt[segsites,]
+  vcfRobject@gt <- vcfRobject@gt[segsites,]
 
-  fix <- as.matrix(vcfR::getFIX(vcfRobj, getINFO = T)[segsites,])
-  gt <- as.matrix(vcfRobj@gt)
-  meta <- append(vcfRobj@meta, paste("##Additional Filters for segregating sites, such that within-sample AF must vary more than:", err))
+  fix <- as.matrix(vcfR::getFIX(vcfRobject, getINFO = T)[segsites , ])
+  gt <- as.matrix(vcfRobject@gt)
+  meta <- append(vcfRobject@meta, paste("##Additional Filters for segregating sites, such that within-sample AF must vary more than:", err))
 
   # Setting class based off of vcfR documentation https://github.com/knausb/vcfR/blob/master/R/AllClass.R
   newvcfR <- new("vcfR", meta = meta, fix = fix, gt = gt)
