@@ -147,7 +147,11 @@ bedtoolsgenomecov2bamCov <- function(gencovdir = NULL, lvls = c(1,5,10,25,50,75,
 
 bamCov2OverallPercCov <- function(input = NULL){
 
+<<<<<<< HEAD
   if(!is.bamCovObj(input)){
+=======
+  if(is.bamCovObj(input)){
+>>>>>>> master
     stop("Input must be of class bamCovObj. See the bedtoolsgenomecov2bamCov function.")
   }
 
@@ -290,7 +294,11 @@ bamCov2SmplChromCov <- function(genomcoordsdf = NULL, windowcovdf = NULL){
 #'
 
 bamCov2SmplRaster <- function(input=NULL){
+<<<<<<< HEAD
   if(!is.bamCovObj(input)){
+=======
+  if(is.bamCovObj(input)){
+>>>>>>> master
     stop("Input must be of class bamCovObj. See the bedtoolsgenomecov2bamCov function.")
   }
 
