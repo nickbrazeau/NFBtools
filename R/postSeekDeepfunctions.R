@@ -65,11 +65,7 @@ SeekDeepOutput2SeekDeepDat <- function(skdpclustinfo_df, readcountcutoff = 0){
 SeekDeepDat2HapPlotter <- function(input, target="Target"){
 
   # error handle
-<<<<<<< HEAD
   if(!is.SeekDeepDat(input)){
-=======
-  if(is.SeekDeepDat(input)){
->>>>>>> master
     stop("Input must be of class SeekDeepDat See the SeekDeepOutput2SeekDeepDat function.")
   }
 
@@ -144,12 +140,7 @@ SeekDeepDat2ExonAnnotation <- function(input,
 
 
   # error handle
-  # error handle
-<<<<<<< HEAD
   if(!is.SeekDeepDat(input)){
-=======
-  if(is.SeekDeepDat(input)){
->>>>>>> master
     stop("Input must be of class SeekDeepDat See the SeekDeepOutput2SeekDeepDat function.")
   }
 
