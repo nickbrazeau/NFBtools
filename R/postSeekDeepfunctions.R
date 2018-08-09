@@ -144,6 +144,7 @@ SeekDeepDat2ExonAnnotation <- function(input,
     stop("Input must be of class SeekDeepDat See the SeekDeepOutput2SeekDeepDat function.")
   }
 
+  require(Biostrings)
 
   skdpclustinfo_df_simp <- input # NFB fix this to input throughout...
 
