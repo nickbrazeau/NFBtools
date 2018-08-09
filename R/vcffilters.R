@@ -293,6 +293,13 @@ vcffilter_format <- function(vcfRobject = NULL,
   #--------------------------------------------------------
 
   formatdf <- formatdf[ , colnames(formatdf) %in% c("ChromKey", "POS", "Indiv", formatlist) ]
+
+  # NAs can arise when vcfs are merged and don't have the same INFO field parameters (i.e. cortex versus gatk)
+  if(any(is.na(formatdf))){
+    warning("Your VCF had NAs that were produced in the tidy2vcf call, which means your Format field parameters are inconsistent. \n You should investigate why this occuring. ")
+  }
+
+
   formatdf <- formatdf %>%
     dplyr::mutate(excl = apply(., 1, function(x){any(x == "DROP")})) %>%
     dplyr::select(ChromKey, POS, Indiv, excl) %>%
