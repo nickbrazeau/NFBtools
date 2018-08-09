@@ -231,7 +231,7 @@ SeekDeepDat2ExonAnnotation <- function(input,
     ###    from "global" Gene Fasta          ###
     ############################################
 
-    RefSeqGenePos <- BioStrings::matchPattern(pattern = Pf3D7haplotypeRef[[1]],
+    RefSeqGenePos <- Biostrings::matchPattern(pattern = Pf3D7haplotypeRef[[1]],
                                   subject = DNAString(seqinr::c2s(gffseq[[1]]))) # find pos of amplicon in gene
 
 
