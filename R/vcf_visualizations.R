@@ -8,19 +8,20 @@
 #'
 #' @export
 
-vcfR2GTCov <- function(vcfR=NULL, biallelic=T){
+vcfR2GTCov <- function(vcfRobject=NULL, biallelic=T){
   require(vcfR)
   require(tidyverse)
   # plot vcf chrom as a list object
-  if(is.null(vcfR)){
+  if(is.null(vcfRobject)){
     stop("Must provide an input file")
   }
-  if(!class(vcfRobject) %in% "vcfR"){
+  if(! class(vcfRobject) %in% "vcfR"){
     stop("vcfRobject must contain  class vcfR")
   }
-  vcf <-vcfR::extract.indels(vcfRobject, return.indels = F) # subset to SNPs
-  vcf <- vcf[vcfR::is.biallelic(vcf)] # subset to biallelic
-  if(!identical(vcfRobject, vcf)){
+
+  vcf <- vcfRobject # legacy
+
+  if( !identical(vcfRobject, vcfR::extract.indels(vcf[vcfR::is.biallelic(vcf)], return.indels = F)) ){
     stop("Your file does not appear to be a vcf with only biallelic SNPs")
   }
 
