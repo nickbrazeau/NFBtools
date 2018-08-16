@@ -1,3 +1,9 @@
+#' @title check if seekdeep dat
+#' @noRd
+
+is.SeekDeepDat <- function(x){inherits(x, "SeekDeepDat")}
+
+
 #' @title skdp_filter_simplifier
 #'
 #' @description filters
@@ -26,7 +32,7 @@ SeekDeepOutput2SeekDeepDat <- function(skdpclustinfo_df, readcountcutoff = 0){
   if(nrow(skdpclustinfo_df_simp) > 0){
     filtered_c_ReadCnt_sum <- aggregate(skdpclustinfo_df_simp$c_ReadCnt ~ skdpclustinfo_df_simp$s_Sample, function(x){sum(x)}, data = skdpclustinfo_df_simp) # get denominator
     colnames(filtered_c_ReadCnt_sum) <- c("s_Sample", "filtered_c_ReadCnt_denom")
-    skdpclustinfo_df_simp <-  left_join(skdpclustinfo_df_simp, filtered_c_ReadCnt_sum, by=c("s_Sample"))
+    skdpclustinfo_df_simp <-  dplyr::left_join(skdpclustinfo_df_simp, filtered_c_ReadCnt_sum, by=c("s_Sample"))
 
 
 
@@ -39,7 +45,7 @@ SeekDeepOutput2SeekDeepDat <- function(skdpclustinfo_df, readcountcutoff = 0){
     stop("There was an error filtering the reads. Contact the developer")
   }
 
-  class(skdpclustinfo_df_simp) <- "SeekDeepDat"
+  class(skdpclustinfo_df_simp) <- append(  class(skdpclustinfo_df_simp) , "SeekDeepDat" )
   return(skdpclustinfo_df_simp)
 
 
@@ -59,7 +65,7 @@ SeekDeepOutput2SeekDeepDat <- function(skdpclustinfo_df, readcountcutoff = 0){
 SeekDeepDat2HapPlotter <- function(input, target="Target"){
 
   # error handle
-  if(class(input) != "SeekDeepDat"){
+  if(!is.SeekDeepDat(input)){
     stop("Input must be of class SeekDeepDat See the SeekDeepOutput2SeekDeepDat function.")
   }
 
@@ -134,10 +140,11 @@ SeekDeepDat2ExonAnnotation <- function(input,
 
 
   # error handle
-  if(class(input) != "SeekDeepDat"){
+  if(!is.SeekDeepDat(input)){
     stop("Input must be of class SeekDeepDat See the SeekDeepOutput2SeekDeepDat function.")
   }
 
+  require(Biostrings)
 
   skdpclustinfo_df_simp <- input # NFB fix this to input throughout...
 
@@ -224,7 +231,7 @@ SeekDeepDat2ExonAnnotation <- function(input,
     ###    from "global" Gene Fasta          ###
     ############################################
 
-    RefSeqGenePos <- BioStrings::matchPattern(pattern = Pf3D7haplotypeRef[[1]],
+    RefSeqGenePos <- Biostrings::matchPattern(pattern = Pf3D7haplotypeRef[[1]],
                                   subject = DNAString(seqinr::c2s(gffseq[[1]]))) # find pos of amplicon in gene
 
 

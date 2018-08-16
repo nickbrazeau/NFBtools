@@ -1,7 +1,11 @@
+#' inherits bamcovobj
+#' @noRd
+
+is.bamCovObj <- function(x){inherits(x, "bamCovObj")}
+
 #' calcCovperc
-#'
-#'
-#' not exported
+#' @noRd
+
 
 calcCovperc <- function(depth, ttlbp, lvl){
   ret <- sum(depth >= lvl)/ttlbp
@@ -131,7 +135,7 @@ bedtoolsgenomecov2bamCov <- function(gencovdir = NULL, lvls = c(1,5,10,25,50,75,
   # end of lapply for files
   )
   # end of function overall
-  class(retlist_all) <- "bamCovObj"
+  class(retlist_all) <- append(class(retlist_all), "bamCovObj")
   names(retlist_all) <- gsub(".long.cov", "", basename(dir(gencovdir, full.names = T))) # add names
   return(retlist_all)
 }
@@ -147,7 +151,7 @@ bedtoolsgenomecov2bamCov <- function(gencovdir = NULL, lvls = c(1,5,10,25,50,75,
 
 bamCov2OverallPercCov <- function(input = NULL){
 
-  if(class(input) != "bamCovObj"){
+  if(!is.bamCovObj(input)){
     stop("Input must be of class bamCovObj. See the bedtoolsgenomecov2bamCov function.")
   }
 
@@ -292,7 +296,8 @@ bamCov2SmplChromCov <- function(genomcoordsdf = NULL, windowcov = NULL){
 #'
 
 bamCov2SmplRaster <- function(input=NULL){
-  if(class(input) != "bamCovObj"){
+
+  if(!is.bamCovObj(input)){
     stop("Input must be of class bamCovObj. See the bedtoolsgenomecov2bamCov function.")
   }
 

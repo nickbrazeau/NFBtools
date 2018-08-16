@@ -99,10 +99,10 @@ vcffilter_CHROMPOS <- function(vcfRobject = NULL,
 #------------------------------------------------------
 
 vcffilter_info <- function(vcfRobject = NULL,
-                           infoMQ=55,
-                           infoQD=25,
-                           infoSOR=2,
-                           infoAF = 0.05,
+                           infoMQ=NULL,
+                           infoQD=NULL,
+                           infoSOR=NULL,
+                           infoAF = NULL,
                            infoDP = NULL, # this is a percentile cutoff
                            infoFS = NULL,
                            infoMQRankSum = NULL,
@@ -152,69 +152,74 @@ vcffilter_info <- function(vcfRobject = NULL,
     infolist <- append(infolist, "ReadPosRankSum")
   }
 
-# extract format list information
-tidyvcf <- vcfR::vcfR2tidy(vcf)
-infodf <- tidyvcf$fix
+  # extract format list information
+  tidyvcf <- vcfR::vcfR2tidy(vcf)
+  infodf <- tidyvcf$fix
 
 
-#--------------------------------------------------------
-# filter loci
-#--------------------------------------------------------
-if(!is.null(infoMQ)){
-  infodf <- infodf %>%
-    dplyr::mutate(MQ = ifelse(MQ < infoMQ, "DROP", MQ))
-}
-if(!is.null(infoQD)){
-  infodf <- infodf %>%
-    dplyr::mutate(QD = ifelse(QD < infoQD, "DROP", QD))
-}
-if(!is.null(infoSOR)){
-  infodf <- infodf %>%
-    dplyr::mutate(SOR = ifelse(SOR > infoSOR, "DROP", SOR))
-}
-if(!is.null(infoAF)){
-  infodf <- infodf %>%
-    dplyr::mutate(AF = ifelse(AF< infoAF, "DROP", AF))
-}
-if(!is.null(infoDP)){
-  DPpercentile <- quantile(infodf$DP, c(infoDP, 1-infoDP))
-  infodf <- infodf %>%
-    dplyr::mutate(DP = ifelse(DPpercentile[1] < DP & DP < DPpercentile[2],
-                              DP, "DROP"))
-}
-if(!is.null(infoFS)){
-  infodf <- infodf %>%
-    dplyr::mutate(FS = ifelse(FS > infoFS, "DROP", FS))
-}
-if(!is.null(infoMQRankSum)){
-  infodf <- infodf %>%
-    dplyr::mutate(MQRankSum = ifelse(MQRankSum < infoMQRankSum, "DROP", MQRankSum))
-}
-if(!is.null(infoReadPosRankSum)){
-  infodf <- infodf %>%
-    dplyr::mutate(ReadPosRankSum = ifelse(ReadPosRankSum < infoReadPosRankSum, "DROP", ReadPosRankSum))
-}
+  #--------------------------------------------------------
+  # filter loci
+  #--------------------------------------------------------
+  if(!is.null(infoMQ)){
+    infodf <- infodf %>%
+      dplyr::mutate(MQ = ifelse(MQ < infoMQ, "DROP", MQ))
+  }
+  if(!is.null(infoQD)){
+    infodf <- infodf %>%
+      dplyr::mutate(QD = ifelse(QD < infoQD, "DROP", QD))
+  }
+  if(!is.null(infoSOR)){
+    infodf <- infodf %>%
+      dplyr::mutate(SOR = ifelse(SOR > infoSOR, "DROP", SOR))
+  }
+  if(!is.null(infoAF)){
+    infodf <- infodf %>%
+      dplyr::mutate(AF = ifelse(AF< infoAF, "DROP", AF))
+  }
+  if(!is.null(infoDP)){
+    DPpercentile <- quantile(infodf$DP, c(infoDP, 1-infoDP))
+    infodf <- infodf %>%
+      dplyr::mutate(DP = ifelse(DPpercentile[1] < DP & DP < DPpercentile[2],
+                                DP, "DROP"))
+  }
+  if(!is.null(infoFS)){
+    infodf <- infodf %>%
+      dplyr::mutate(FS = ifelse(FS > infoFS, "DROP", FS))
+  }
+  if(!is.null(infoMQRankSum)){
+    infodf <- infodf %>%
+      dplyr::mutate(MQRankSum = ifelse(MQRankSum < infoMQRankSum, "DROP", MQRankSum))
+  }
+  if(!is.null(infoReadPosRankSum)){
+    infodf <- infodf %>%
+      dplyr::mutate(ReadPosRankSum = ifelse(ReadPosRankSum < infoReadPosRankSum, "DROP", ReadPosRankSum))
+  }
 
-#--------------------------------------------------------
-# apply filter
-#--------------------------------------------------------
+  #--------------------------------------------------------
+  # apply filter
+  #--------------------------------------------------------
 
-infodf <- infodf[ , colnames(infodf) %in% c("CHROM", "POS", infolist) ]
-passedloci <- infodf %>%
-  dplyr::mutate(CHROMPOS = paste0(CHROM, POS)) %>%
-  dplyr::mutate(incl = apply(., 1, function(x){! any(x == "DROP") })) %>%
-  dplyr::select(incl)
+  infodf <- infodf[ , colnames(infodf) %in% c("CHROM", "POS", infolist) ]
+  passedloci <- infodf %>%
+    dplyr::mutate(CHROMPOS = paste0(CHROM, POS)) %>%
+    dplyr::mutate(incl = apply(., 1, function(x){! any(x == "DROP") })) %>%
+    dplyr::select(incl)
 
-passedloci <- passedloci$incl
+  passedloci <- passedloci$incl
 
-fix <- as.matrix(vcfR::getFIX(vcf, getINFO = T)[ passedloci ,])
-gt <- as.matrix(vcf@gt[ passedloci , ])
-meta <- append(vcf@meta, "##Additional Filters provided by NFB filter tools")
+  # NAs can arise when vcfs are merged and don't have the same INFO field parameters (i.e. cortex versus gatk)
+  if(any(is.na(passedloci))){
+    warning("Your VCF had NAs that were produced in the tidy2vcf call, which means your INFO field parameters are inconsistent. \n You should investigate why this occuring. ")
+  }
 
-# Setting class based off of vcfR documentation https://github.com/knausb/vcfR/blob/master/R/AllClass.R
-newvcfR <- new("vcfR", meta = meta, fix = fix, gt = gt)
+  fix <- as.matrix(vcfR::getFIX(vcf, getINFO = T)[ passedloci ,])
+  gt <- as.matrix(vcf@gt[ passedloci , ])
+  meta <- append(vcf@meta, "##Additional Filters provided by NFB filter tools")
 
-newvcfR
+  # Setting class based off of vcfR documentation https://github.com/knausb/vcfR/blob/master/R/AllClass.R
+  newvcfR <- new("vcfR", meta = meta, fix = fix, gt = gt)
+
+  return(newvcfR)
 
 }
 
@@ -233,9 +238,9 @@ vcffilter_format <- function(vcfRobject = NULL,
                              formatGQ=NULL,
                              formatDP = NULL,
                              formatSP = NULL,
-                             prop.loci.missing = 0.5, # this is given a loci, how many samples can have missing information before it is dropped
+                             prop.loci.missing = NULL, # this is given a loci, how many samples can have missing information before it is dropped
                              biallelic = TRUE,
-                             SNPs = FALSE){
+                             SNPs = TRUE){
 
   require(vcfR)
   require(tidyverse)
@@ -288,6 +293,13 @@ vcffilter_format <- function(vcfRobject = NULL,
   #--------------------------------------------------------
 
   formatdf <- formatdf[ , colnames(formatdf) %in% c("ChromKey", "POS", "Indiv", formatlist) ]
+
+  # NAs can arise when vcfs are merged and don't have the same INFO field parameters (i.e. cortex versus gatk)
+  if(any(is.na(formatdf))){
+    warning("Your VCF had NAs that were produced in the tidy2vcf call, which means your Format field parameters are inconsistent. \n You should investigate why this occuring. ")
+  }
+
+
   formatdf <- formatdf %>%
     dplyr::mutate(excl = apply(., 1, function(x){any(x == "DROP")})) %>%
     dplyr::select(ChromKey, POS, Indiv, excl) %>%
@@ -316,7 +328,7 @@ vcffilter_format <- function(vcfRobject = NULL,
   # Setting class based off of vcfR documentation https://github.com/knausb/vcfR/blob/master/R/AllClass.R
   newvcfR <- new("vcfR", meta = meta, fix = fix, gt = gt)
 
-  newvcfR
+  return(newvcfR)
 
 }
 
@@ -361,7 +373,7 @@ vcfR2segsites <- function(vcfRobject = NULL, err = 0.025){
   # Setting class based off of vcfR documentation https://github.com/knausb/vcfR/blob/master/R/AllClass.R
   newvcfR <- new("vcfR", meta = meta, fix = fix, gt = gt)
 
-  newvcfR
+  return(newvcfR)
 
 }
 
