@@ -331,7 +331,7 @@ vcffilter_format <- function(vcfRobject = NULL,
 
 vcfR2segsites <- function(vcfRobject = NULL, err = 0.025){
   vcf <- vcfRobject # legacy
-  if(!identical(vcf, vcf[is.biallelic(vcf)])){
+  if(!identical(vcf, vcf[vcfR::is.biallelic(vcf)])){
     stop("VCF must be biallelic for this to work.")
   }
 

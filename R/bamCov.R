@@ -59,6 +59,10 @@ bedtoolsgenomecov2bamCov <- function(gencovdir = NULL, lvls = c(1,5,10,25,50,75,
   windowcov <- parallel::mclapply(datchromlist, windowfunctioncalculator)
   windowcov <- do.call("rbind.data.frame", windowcov)
 
+  # store the bp window used
+  windowcov <- list(windowcovdf = windowcov,
+                    bpwindow = bpwindow)
+
     ## genome summary
     genomsummarydepth <- dat %>%
       dplyr::select(depth) %>%
@@ -237,7 +241,7 @@ bamCov2SmplPercCov <- function(chromlistcovpercdf = NULL){
 #'
 
 
-bamCov2SmplChromCov <- function(genomcoordsdf = NULL, windowcovdf = NULL){
+bamCov2SmplChromCov <- function(genomcoordsdf = NULL, windowcov = NULL){
   genomcoordsdf <- genomcoordsdf %>%
     dplyr::filter(CHROM != "genome") %>%
     dplyr::arrange(end) %>%
@@ -246,15 +250,17 @@ bamCov2SmplChromCov <- function(genomcoordsdf = NULL, windowcovdf = NULL){
   chromnumdf <- genomcoordsdf %>%
     dplyr::select(CHROM, CHROM_num)
 
-  windowcovdf <- windowcovdf %>%
+  windowcovdf <- windowcov$windowcovdf %>%
     dplyr::left_join(x=., y=chromnumdf, by="CHROM")
+
+  bpwindow <-  windowcov$bpwindow
 
   plotObj <- ggplot() +
     geom_rect(data=genomcoordsdf, aes(xmin=start, xmax=end, ymin=CHROM_num-0.25, ymax=CHROM_num+0.25), fill="#d9d9d9", color="#d9d9d9") +
     geom_rect(data=windowcovdf, aes(xmin=start, xmax=end, ymin=CHROM_num-0.2, ymax=CHROM_num+0.2, fill=meancov)) +
     scale_fill_gradientn("Mean \n Coverage", colours = c("#313695", "#ffffbf", "#d53e4f")) +
     scale_y_continuous(breaks = 1:nrow(genomcoordsdf), labels=chromnumdf$CHROM) +
-    ggtitle(paste("Mean Coverage with a ", windowcovdf$end[1] - windowcovdf$start[1], " base-pair Sliding Window \n by Chromosome for Sample:", windowcovdf$smpl[1])) +
+    ggtitle(paste("Mean Coverage with a ", bpwindow, " base-pair Sliding Window \n by Chromosome for Sample:", windowcovdf$smpl[1])) +
     xlab("Chromosome Position") + ylab("Chromosome") +
     theme(plot.title = element_text(hjust = 0.5, family="Arial", size=17, face = "bold"),
           axis.text.x = element_text(family="Arial", size=13, face = "bold", angle=90, vjust=0.5),
