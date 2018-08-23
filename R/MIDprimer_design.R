@@ -1,5 +1,6 @@
-# MIDMaker
-# not exported
+#' MIDmaker
+#' no export
+
 MIDmaker <- function(length, homopolymercutoff){
 
   MID <- paste0(c(sample(x=c("C","G"), size=1), sample(x=c("C","G", "A", "T"), size=length-1, replace = T)), collapse="") # can't start with A or T
@@ -33,6 +34,8 @@ MIDPrimerFinder <- function(design_fasta = NULL,
                             MID2targetmismatchesAllowed = NULL,
                             MIDnum = NULL
                             ){
+
+  design_fasta <- Biostrings::readDNAStringSet(filepath = design_fasta, format = "fasta", use.names = T)
 
   ## Housekeeping
   fw <- design_fasta[ grepl("forward", tolower(names(design_fasta))) ]
