@@ -98,7 +98,7 @@ MIDPrimerFinder <- function(design_fasta = NULL,
     propMIDs <- c(propMIDs, currMIDs)
 
 
-    while( any( TRUE %in% c( as.vector(Biostrings::reverseComplement(Biostrings::DNAStringSet(propMIDs))) %in% as.vector(Biostrings::DNAStringSet(propMIDs))) ) | # catch any reverse complements -- repropose
+    while( any( TRUE == c( as.vector(Biostrings::reverseComplement(Biostrings::DNAStringSet(propMIDs))) %in% as.vector(Biostrings::DNAStringSet(propMIDs))) ) | # catch any reverse complements -- repropose
            sum(sapply(propMIDs, function(x){Biostrings::vcountPattern(x, tg, max.mismatch = MID2targetmismatchesAllowed) })) > 0 | # catch any close matches to target
            any( TRUE %in%  duplicated(propMIDs) )
            ){
