@@ -1,5 +1,6 @@
 #' MIDmaker
 #' no export
+#' #' @noRd
 
 MIDmaker <- function(length, homopolymercutoff){
 
@@ -97,7 +98,7 @@ MIDPrimerFinder <- function(design_fasta = NULL,
     propMIDs <- c(propMIDs, currMIDs)
 
 
-    while( any( TRUE %in% c(Biostrings::reverseComplement(Biostrings::DNAStringSet(propMIDs)) %in% Biostrings::DNAStringSet(propMIDs)) ) | # catch any reverse complements -- repropose
+    while( any( TRUE %in% c( as.vector(Biostrings::reverseComplement(Biostrings::DNAStringSet(propMIDs))) %in% as.vector(Biostrings::DNAStringSet(propMIDs))) ) | # catch any reverse complements -- repropose
            sum(sapply(propMIDs, function(x){Biostrings::vcountPattern(x, tg, max.mismatch = MID2targetmismatchesAllowed) })) > 0 | # catch any close matches to target
            any( TRUE %in%  duplicated(propMIDs) )
            ){
@@ -128,7 +129,7 @@ MIDPrimerFinder <- function(design_fasta = NULL,
 
     if(int%%10 == 0){cat(paste0("Iteration  ", int, "\n ------- \n"))}
     # get pairs and pair.list
-    pairs <- t(combn(propMIDs,m=2)) # choose 2
+    pairs <- t(combn(propMIDs, m=2)) # choose 2
     pairs_list <- split(pairs, seq(nrow(pairs)))
     pairs_list_ret <- parallel::mclapply(pairs_list, function(x){stringdist::stringdistmatrix(x[1], x[2], method = c("hamming"))})
     pairs_list_ret <- tibble(primer = c(pairs[,1], pairs[,2]), Hdist = rep(unlist(pairs_list_ret),2)) # TODO sloppy
