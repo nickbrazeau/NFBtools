@@ -94,35 +94,40 @@ MIDPrimerFinder <- function(design_fasta = NULL,
 
   while( length(finalMIDs) < n ){
 
-    propMIDs <- replicate(n, MIDmaker(MIDlength, MIDhomopolymerallowance)) # init
+    propMIDs <- replicate(n, NFBtools::MIDmaker(MIDlength, MIDhomopolymerallowance)) # init
     propMIDs <- c(propMIDs, currMIDs)
 
 
-    while( any( TRUE == c( as.vector(Biostrings::reverseComplement(Biostrings::DNAStringSet(propMIDs))) %in% as.vector(Biostrings::DNAStringSet(propMIDs))) ) | # catch any reverse complements -- repropose
-           sum(sapply(propMIDs, function(x){Biostrings::vcountPattern(x, tg, max.mismatch = MID2targetmismatchesAllowed) })) > 0 | # catch any close matches to target
-           any( TRUE %in%  duplicated(propMIDs) )
-           ){
-        # find culprits for rev comp
-        revcount <- sum(Biostrings::reverseComplement(Biostrings::DNAStringSet(propMIDs)) %in% Biostrings::DNAStringSet(propMIDs))
-        if(revcount > 0){
-          propMIDs[ Biostrings::reverseComplement(Biostrings::DNAStringSet(propMIDs)) %in% Biostrings::DNAStringSet(propMIDs) ] <- replicate(revcount, MIDmaker(MIDlength, MIDhomopolymerallowance))
-        }
-
-        # find culprits for overlap targets
-        ot_vect <- which( sapply(propMIDs, function(x){Biostrings::vcountPattern(x, tg, max.mismatch = MID2targetmismatchesAllowed) }) > 0 )
-        if(length(ot_vect) > 0){
-        propMIDs[ot_vect] <- replicate(length(ot_vect), MIDmaker(MIDlength, MIDhomopolymerallowance))
-        }
-
-        # find culprits for duplicates
-        propMIDs[duplicated(propMIDs)] <-  replicate(sum(duplicated(propMIDs)), MIDmaker(MIDlength, MIDhomopolymerallowance))
+    # housekeeping for INIT checks
+    rev_culprits <- as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(propMIDs))) %in% as.character(Biostrings::DNAStringSet(propMIDs))  # catch any reverse complements
+    ot_cultprits <- c( sapply(propMIDs, function(x){Biostrings::vcountPattern(x, tg, max.mismatch = MID2targetmismatchesAllowed) }) > 0 )  # catch overlap of MIDs with target sequence
+    dup_culprits <- duplicated(propMIDs) # catch duplicated MIDs
 
 
-        # make sure to return a vector
-        propMIDs <- unlist(propMIDs) # if replicate has n=0, it returns a list class which will coerce our atomic vector into a list. Don't want this
+    # repropose culprits
+    while( sum(rev_culprits) > 0 | sum(ot_cultprits) > 0 | sum(dup_culprits) > 0){
 
+      if(sum(rev_culprits) > 0){
+        propMIDs[rev_culprits] <- replicate(sum(rev_culprits), MIDmaker(MIDlength, MIDhomopolymerallowance))
       }
 
+      if(sum(ot_cultprits) > 0){
+        propMIDs[ot_cultprits] <- replicate(sum(ot_cultprits), MIDmaker(MIDlength, MIDhomopolymerallowance))
+      }
+
+      if(sum(dup_culprits) > 0){
+        propMIDs[dup_culprits] <- replicate(sum(dup_culprits), MIDmaker(MIDlength, MIDhomopolymerallowance))
+      }
+
+        # housekeeping for CANDIDATE checks
+        rev_culprits <- as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(propMIDs))) %in% as.character(Biostrings::DNAStringSet(propMIDs))  # catch any reverse complements
+        ot_cultprits <- c( sapply(propMIDs, function(x){Biostrings::vcountPattern(x, tg, max.mismatch = MID2targetmismatchesAllowed) }) > 0 )  # catch overlap of MIDs with target sequence
+        dup_culprits <- duplicated(propMIDs) # catch duplicated MIDs
+        # ^ note above is strictly for readability and not memory. I would call this not-best-practice, as it would be easier to evaluate the condition on the fly w/in the while loop...but for clarity
+
+
+
+    }
 
 
 
@@ -159,7 +164,9 @@ MIDPrimerFinder <- function(design_fasta = NULL,
   }
 
   ret <- list(finalMIDs = finalMIDs,
-              primerinfo = primerinfo)
+              primerinfo = primerinfo,
+              fwprimer = fw,
+              rvprimer = rv)
   return(ret)
 
 
