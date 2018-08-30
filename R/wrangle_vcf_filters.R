@@ -110,8 +110,6 @@ vcffilter_info <- function(vcfRobject = NULL,
                            biallelic = TRUE,
                            SNPs = TRUE){
 
-  require(vcfR)
-  require(tidyverse)
 
   vcf <- vcfRobject # legacy
   # -----------------------------------------------------
@@ -242,8 +240,6 @@ vcffilter_format <- function(vcfRobject = NULL,
                              biallelic = TRUE,
                              SNPs = TRUE){
 
-  require(vcfR)
-  require(tidyverse)
 
   vcf <- vcfRobject # legacy
   # -----------------------------------------------------
@@ -384,9 +380,9 @@ vcfR2segsites <- function(vcfRobject = NULL, err = 0.025){
 
 #' @title cormat
 #' @description Calculates genetic autocorrelation among variants.
-#' @detials Expects a matrix of allele frequencies with rows as loci and columns as samples
+#' @details Expects a matrix of allele frequencies with rows as loci and columns as samples
 #'
-#'@author Bob Verity & Nick Brazeau
+#' @author Bob Verity & Nick Brazeau
 #'
 #' @export
 #'
@@ -414,18 +410,16 @@ corMat <- function(m) {
 
 #' @title genautocorr setup
 #' @description Calculates genetic autocorrelation for later linkage disequilibrium filtering.
-#' @detials From an object of class \code{vcfR}, calculate the genetic autocorrelation as the estimate of linkage disequilibrium by genetic distance.
+#' @details From an object of class \code{vcfR}, calculate the genetic autocorrelation as the estimate of linkage disequilibrium by genetic distance.
 #' @param vcffile A variant call file (vcf) path. This VCF will be converted to an object of class \code{vcfR}.
 #'
-#'@author Bob Verity & Nick Brazeau
+#' @author Bob Verity & Nick Brazeau
 #'
 #' @export
 #'
 
 genautocorr <- function(vcffile = NULL, vcfR = NULL, biallelicsnps=TRUE){
 
-  require(vcfR)
-  require(tidyverse)
 
   # -----------------------------------------------------
   # Read and check input
@@ -497,8 +491,6 @@ genautocorr <- function(vcffile = NULL, vcfR = NULL, biallelicsnps=TRUE){
 
 vcfR2LDfiltered <- function(vcffile = NULL, vcfR = NULL, genautocorrresult=NULL, threshDist=1e3, biallelicsnps=TRUE){
 
-  require(vcfR)
-  require(tidyverse)
 
   # -----------------------------------------------------
   # Read and check input

@@ -1,11 +1,13 @@
-#' inherits bamcovobj
-#' @noRd
+
+
+# is.bamCovObj
+# not exported
 
 is.bamCovObj <- function(x){inherits(x, "bamCovObj")}
 
-#' calcCovperc
-#' @noRd
 
+# CalcCovperc
+# not exported
 
 calcCovperc <- function(depth, ttlbp, lvl){
   ret <- sum(depth >= lvl)/ttlbp

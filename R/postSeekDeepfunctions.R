@@ -1,5 +1,5 @@
-#' @title check if seekdeep dat
-#' @noRd
+# is.SeekDeepDat
+# not exported
 
 is.SeekDeepDat <- function(x){inherits(x, "SeekDeepDat")}
 

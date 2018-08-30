@@ -1,9 +1,5 @@
-#' @title DAB
-#'
-#' @author Nick Brazeau
-#' @description This is based on the within sample Fw gen dist function described in PMID: 26943619
-#'
-
+# dab
+# not exported
 
 dab <- function(afmat){
 
@@ -16,7 +12,7 @@ dab <- function(afmat){
 #'
 #' @author Nick Brazeau
 #' @description This is based on the within sample Fw gen dist function described in PMID: 26943619
-#' @'details Inspired by Bob Verity's corMat function
+#' @details Inspired by Bob Verity's corMat function
 
 wicalc <- function(NRAFdf, window=50){
   cij <- NULL # init
@@ -69,10 +65,11 @@ wicalc <- function(NRAFdf, window=50){
 #'
 #' @author Nick Brazeau
 #'
-#'@TODO fix sloppy NRAF
-#'
 #' @export
 
+
+
+# TODO fix sloppy NRAF
 
 vcfR2Fw_pairwisegendist <- function(vcfRobject = NULL, biallelicsnps=TRUE, segsites=0.001){
 

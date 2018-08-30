@@ -1,12 +1,10 @@
-
-#------------------------------------------------
 #' @title Plot Genetic Autocorrelation result
 #'
 #' @description Plots the autocorrelation between loci (calculated from population allele frequencies)
 #'
 #' @param genautocorrobj an object of class \code{genautocorr}, as produced by the function \code{polyIBD::genautocorr}
 #'
-#' do not export yet -- to do
+#' @export
 
 # TODO this was copied over from polyIBD on Aug 13, 2018. Need to determine if needed and fix up LD processing
 

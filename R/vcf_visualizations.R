@@ -4,7 +4,6 @@
 #'
 #' @description Takes a \code{vcf} or \code{vcfRobject} and plots the GT levels
 #'
-#' @param
 #'
 #' @export
 

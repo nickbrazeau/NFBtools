@@ -25,7 +25,8 @@ Imports:
     gtable,
     ggpubr,
     vcfR,
-    seqinr
+    seqinr,
+    Rcpp
 biocViews:
     Biostrings
 Suggests:
@@ -43,5 +44,5 @@ SystemRequirements:
     GNU make
 License: MIT + file LICENSE
 Encoding: UTF-8
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 VignetteBuilder: knitr

@@ -1,6 +1,5 @@
-#' MIDmaker
-#' no export
-#' #' @noRd
+# MID
+# not exported
 
 MIDmaker <- function(length, homopolymercutoff){
 
