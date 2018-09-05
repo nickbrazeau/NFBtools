@@ -6,12 +6,12 @@
 using namespace Rcpp;
 
 // meanC
-double meanC(NumericVector x);
+double meanC(Rcpp::NumericVector x);
 RcppExport SEXP _NFBtools_meanC(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type x(xSEXP);
     rcpp_result_gen = Rcpp::wrap(meanC(x));
     return rcpp_result_gen;
 END_RCPP
@@ -19,6 +19,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_NFBtools_meanC", (DL_FUNC) &_NFBtools_meanC, 1},
+    {"_NFBtools_gamma*lambda", (DL_FUNC) &_NFBtools_gamma*lambda, 1},
     {NULL, NULL, 0}
 };
 
