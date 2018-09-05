@@ -105,6 +105,8 @@ polyIBDsim2GTcov <- function(polyIBDsim){
   haploid2 <- data.frame(polyIBDsim$haploid$haploid2)
   colnames(haploid2) <- c(paste0("Smpl2_Haplotype", seq(1, ncol(haploid1))))
   IBD <- data.frame(polyIBDsim$IBD)
+  IBD[IBD == 0] <- "U"
+  IBD[IBD == 1] <- "I"
   colnames(IBD) <- c(paste0("HaploPair_IBD", seq(1, ncol(haploid1))))
 
   snpdf <- cbind.data.frame(CHROM = polyIBDsim$CHROMPOS$CHROM,
@@ -116,7 +118,7 @@ polyIBDsim2GTcov <- function(polyIBDsim){
   snpdf <- snpdf %>%
     tibble::as.tibble(.) %>%
     tidyr::gather(key="param", value="GT", 3:ncol(snpdf)) %>%
-    dplyr::mutate(GTfact = factor(GT, levels=c(0,1,2), labels=c("Ref", "Het", "Alt")))
+    dplyr::mutate(GTfact = factor(GT, levels=c(0,1,2, "U", "I"), labels=c("Ref", "Het", "Alt", "Not IBD", "IBD")))
 
   snpdflist <- split(snpdf, f=snpdf$CHROM)
 
@@ -137,7 +139,7 @@ polyIBDsim2GTcov <- function(polyIBDsim){
     geom_rect(mapping=aes(xmin=start, xmax=end, ymin=paramindex-0.49, ymax=paramindex+0.49, fill=GTfact)) +
     scale_y_continuous(breaks = min(snpdf$paramindex):max(snpdf$paramindex),
                        labels = levels(factor(snpdf$param))) +
-    scale_fill_manual("Genotype Call", values=c("#AA0A3C", "#313695", "#fee090", "#cccccc")) +
+    scale_fill_manual("Genotype Call", values=c("#AA0A3C", "#313695", "#fee090", "#8c510a", "#01665e", "#cccccc")) +
     facet_grid(CHROM~.) +
     theme(panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
