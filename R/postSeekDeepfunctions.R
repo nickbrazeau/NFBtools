@@ -204,7 +204,7 @@ SeekDeepDat2ExonAnnotation <- function(input,
     SNP <- seqinr::s2c(input$c_Consensus[1])[which(x != y)] # nucleotide bp that are associated with snps
 
     SNPdf <- data.frame(h_popUID=rep(input$h_popUID[1], length(SNPpos)),
-                        AmpPos=SNPpos, SNP=SNP)
+                        SNPpos=SNPpos, SNP=SNP)
     return(SNPdf)   # a single consensus cluster may have several variants -- need to account for this --> will do left_join
   }
 
@@ -236,41 +236,57 @@ SeekDeepDat2ExonAnnotation <- function(input,
     }
 
 
-    ############################################
-    ### Updated Amplicon Position to Gene Pos ##
-    ############################################
-    skdpconsens_SNP$GenePos <- skdpconsens_SNP$AmpPos + RefSeqGenePos@ranges@start - 1 # minus one here so the first base doesn't get counted twice in our amp count and our vcf count
 
-    ############################################
-    ####    Referent Amplicon w/in Gene   ######
-    ############################################
-    AArefseq <- seqinr::translate(gffseq[[1]], sens=F, numcode=ncbigeneticcode)
+    if(geneid.gff$strand == "+"){
+      # find starting gene pos
+      skdpconsens_SNP$GenePos <- skdpconsens_SNP$SNPpos + RefSeqGenePos@ranges@start - 1 # minus one here so the first base doesn't get counted twice in our amp count and our vcf count
+      # Referent Amplicon w/in Gene
+      AArefseq <- seqinr::translate(gffseq[[1]], sens="F", numcode=ncbigeneticcode)
+      # Make Mutant Amplicon Haplotype
+      haplist <- split(skdpconsens_SNP, f=factor(skdpconsens_SNP$h_popUID))
 
-    ############################################
-    ####    Make Mutant Amplicon Haplotype  ####
-    ############################################
-    haplist <- split(skdpconsens_SNP, f=factor(skdpconsens_SNP$h_popUID))
+      mutatehap_possense <- function(haplistobj){
+        mutseq <- gffseq[[1]]
+        mutseq[haplistobj$GenePos] <- as.character(haplistobj$SNP) # make mutation seq by putting in all SNPs
+        AAmutseq <- seqinr::translate(mutseq, sens="F", numcode=ncbigeneticcode) # translate
 
-    mutatehap <- function(haplistobj){
-      mutseq <- gffseq[[1]]
-      mutseq[haplistobj$GenePos] <- as.character(haplistobj$SNP) # make mutation seq by putting in all SNPs
-      AAmutseq <- seqinr::translate(mutseq, sens=F, numcode=ncbigeneticcode) # translate
+        haplistobj$CODON <- ceiling(haplistobj$GenePos/3) # ceiling will so that 1/3, 2/3, 3/3 all got to #1 CODON
+        haplistobj$AAREF <- AArefseq[haplistobj$CODON]
+        haplistobj$AAALT <- AAmutseq[haplistobj$CODON]
+        haplistobj$MUT_Type <- ifelse(haplistobj$AAREF == haplistobj$AAALT, "Syn", "Nonsyn")
+        return(haplistobj)
+      }
+      skdpconsens_SNP <- do.call("rbind", lapply(haplist, mutatehap_possense))
 
-      haplistobj$CODON <- ceiling(haplistobj$GenePos/3) # ceiling will so that 1/3, 2/3, 3/3 all got to #1 CODON
-      haplistobj$AAREF <- AArefseq[haplistobj$CODON]
-      haplistobj$AAALT <- AAmutseq[haplistobj$CODON]
-      haplistobj$MUT_Type <- ifelse(haplistobj$AAREF == haplistobj$AAALT, "Syn", "Nonsyn")
-      return(haplistobj)
+    }else if(geneid.gff$strand == "-"){
+      # find starting gene pos
+      skdpconsens_SNP$GenePos <- (RefSeqGenePos@ranges@start+RefSeqGenePos@ranges@width) - skdpconsens_SNP$SNPpos - 1 # minus one here so the first base doesn't get counted twice in our amp count and our vcf count
+      # Referent Amplicon w/in Gene
+      AArefseq <- seqinr::translate(gffseq[[1]], sens="F", numcode=ncbigeneticcode)
+      # Make Mutant Amplicon Haplotype
+      haplist <- split(skdpconsens_SNP, f=factor(skdpconsens_SNP$h_popUID))
+
+      mutatehap_possense <- function(haplistobj){
+        mutseq <- gffseq[[1]]
+        mutseq[haplistobj$GenePos] <- as.character(haplistobj$SNP) # make mutation seq by putting in all SNPs
+        AAmutseq <- seqinr::translate(mutseq, sens="R", numcode=ncbigeneticcode) # translate
+
+        haplistobj$CODON <- ceiling(haplistobj$GenePos/3) # ceiling will so that 1/3, 2/3, 3/3 all got to #1 CODON
+        haplistobj$AAREF <- AArefseq[haplistobj$CODON]
+        haplistobj$AAALT <- AAmutseq[haplistobj$CODON]
+        haplistobj$MUT_Type <- ifelse(haplistobj$AAREF == haplistobj$AAALT, "Syn", "Nonsyn")
+        return(haplistobj)
+      }
+      skdpconsens_SNP <- do.call("rbind", lapply(haplist, mutatehap_possense))
+
+    } else {
+      stop("Error parsing vcf. Does not contain strand information")
     }
 
-    skdpconsens_SNP <- do.call("rbind", lapply(haplist, mutatehap))
-
-    #################################################################
-    #######                        RETURN                       #####
-    #################################################################
+    # return
     skdpvcf <- dplyr::left_join(input, skdpconsens_SNP, by=c("h_popUID"))
 
-  } else { skdpvcf <- NULL }
+  } else { skdpvcf <- dplyr::left_join(input, skdpconsens_SNP) } # will just return empty AA change table
 
   return(skdpvcf)
 }
