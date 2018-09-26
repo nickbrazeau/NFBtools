@@ -285,8 +285,16 @@ SeekDeepDat2ExonAnnotation <- function(input,
 
     # return
     skdpvcf <- dplyr::left_join(input, skdpconsens_SNP, by=c("h_popUID"))
+    skdpvcf$GenePos <- NA
+    skdpvcf$CODON <- NA
+    skdpvcf$AAREF <- NA
+    skdpvcf$AAALT <- NA
+    skdpvcf$MUT_Type <- NA
 
-  } else { skdpvcf <- dplyr::left_join(input, skdpconsens_SNP) } # will just return empty AA change table
+  } else {
+    skdpvcf <- dplyr::left_join(input, skdpconsens_SNP)
+
+    } # will just return empty AA change table
 
   return(skdpvcf)
 }
