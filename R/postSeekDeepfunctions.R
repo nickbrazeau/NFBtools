@@ -213,17 +213,12 @@ SeekDeepDat2ExonAnnotation <- function(input,
 
   # call snps
   skdpconsens_SNP <- do.call("rbind", skdpconsens_SNPlist)
-  ############################################
-  ##### error handling if no snps in amplicon
-  ############################################
-  if(nrow(skdpconsens_SNP) !=0){
+
+  if(nrow(skdpconsens_SNP) !=0){   # error handling if no snps in amplicon
 
 
-    ############################################
-    ###    Identify First base in Amplicon   ###
-    ###    from "global" Gene Fasta          ###
-    ############################################
 
+    # Identify First base in Amplicon  from "global" Gene Fasta
     RefSeqGenePos <- Biostrings::matchPattern(pattern = Pf3D7haplotypeRef[[1]],
                                   subject = DNAString(seqinr::c2s(gffseq[[1]]))) # find pos of amplicon in gene
 
@@ -285,15 +280,14 @@ SeekDeepDat2ExonAnnotation <- function(input,
 
     # return
     skdpvcf <- dplyr::left_join(input, skdpconsens_SNP, by=c("h_popUID"))
+
+  } else {
+    skdpvcf <- dplyr::left_join(input, skdpconsens_SNP)
     skdpvcf$GenePos <- NA
     skdpvcf$CODON <- NA
     skdpvcf$AAREF <- NA
     skdpvcf$AAALT <- NA
     skdpvcf$MUT_Type <- NA
-
-  } else {
-    skdpvcf <- dplyr::left_join(input, skdpconsens_SNP)
-
     } # will just return empty AA change table
 
   return(skdpvcf)
