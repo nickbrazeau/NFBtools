@@ -170,7 +170,7 @@ vcfR2Fw_pairwisegendist <- function(vcfRobject = NULL, biallelicsnps=TRUE, segsi
 
 # TODO eventually make this compatible with the end MIP output
 
-vcfR2Fw_pairwisegendist <- function(NRAFlist = NULL){
+NRAFlist2Fw_pairwisegendist <- function(NRAFlist = NULL){
 
 # get the correlation matrix
 wi <- parallel::mclapply(NRAFlist, wicalc, window=50)
