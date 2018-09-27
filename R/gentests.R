@@ -76,7 +76,7 @@ wicalc <- function(NRAFdf, window=50){
 
 # TODO fix sloppy NRAF
 
-vcfR2Fw_pairwisegendist <- function(vcfRobject = NULL, biallelicsnps=TRUE, segsites=0.001){
+vcfR2Fw_pairwisegendist <- function(vcfRobject = NULL, biallelicsnps=TRUE, segsites=0.001, window=50){
 
   if(!class(vcfRobject) %in% "vcfR"){
     stop("vcfRobject must contain  class vcfR")
@@ -128,7 +128,7 @@ vcfR2Fw_pairwisegendist <- function(vcfRobject = NULL, biallelicsnps=TRUE, segsi
     m=2)) # choose 2
 
   # get the correlation matrix
-  wi <- parallel::mclapply(NRAFlist, wicalc, window=50)
+  wi <- parallel::mclapply(NRAFlist, wicalc, window=window)
   #--------------------------------------------------------
   # calculations
   #--------------------------------------------------------
@@ -175,10 +175,10 @@ vcfR2Fw_pairwisegendist <- function(vcfRobject = NULL, biallelicsnps=TRUE, segsi
 
 # TODO eventually make this compatible with the end MIP output
 
-NRAFlist2Fw_pairwisegendist <- function(NRAFlist = NULL){
+NRAFlist2Fw_pairwisegendist <- function(NRAFlist = NULL, window=50){
 
 # get the correlation matrix
-wi <- parallel::mclapply(NRAFlist, wicalc, window=50)
+wi <- parallel::mclapply(NRAFlist, wicalc, window=window)
 #--------------------------------------------------------
 # calculations
 #--------------------------------------------------------
