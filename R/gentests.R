@@ -149,7 +149,7 @@ vcfR2Fw_pairwisegendist <- function(vcfRobject = NULL, biallelicsnps=TRUE, segsi
   dablist <- lapply(AFlist, function(afmatpair){
     pair <- colnames(afmatpair)
     dabret <- dab(afmatpair)
-    dabret <- 1/length(dabret) * sum( (dabret * wiret) )
+    dabret <- 1/nrow(dabret) * sum( (dabret * wiret), na.rm = T )
 
     ret <- cbind.data.frame(pair[1], pair[2], dabret)
     return(ret)
@@ -177,43 +177,45 @@ vcfR2Fw_pairwisegendist <- function(vcfRobject = NULL, biallelicsnps=TRUE, segsi
 
 NRAFdf2Fw_pairwisegendist <- function(NRAFdf = NULL, window=50){
 
-# get the correlation matrix
-wi <- parallel::mclapply(NRAFlist, wicalc, window=window)
-#--------------------------------------------------------
-# calculations
-#--------------------------------------------------------
-NRAFlist <- split(NRAFdf, NRAFdf$CHROM)
+  # setup
+  NRAFlist <- split(NRAFdf, NRAFdf$CHROM)
 
-# get all pairs of samples
-pairs <- t(combn(
-  colnames(NRAFlist[[1]])[3:ncol(NRAFlist[[1]])], # just colnames of samples not chrom,pos
-  m=2)) # choose 2
+  # get the correlation matrix
+  wi <- parallel::mclapply(NRAFlist, wicalc, window=window)
+  #--------------------------------------------------------
+  # calculations
+  #--------------------------------------------------------
 
-# pairings
-pairs.list <- split(pairs, seq(nrow(pairs)))
+  # get all pairs of samples
+  pairs <- t(combn(
+    colnames(NRAFlist[[1]])[3:ncol(NRAFlist[[1]])], # just colnames of samples not chrom,pos
+    m=2)) # choose 2
 
-# just need a vector of the wi results
-wiret <- do.call("rbind", wi)$wi
+  # pairings
+  pairs.list <- split(pairs, seq(nrow(pairs)))
+
+  # just need a vector of the wi results
+  wiret <- do.call("rbind", wi)$wi
 
 
-AFlist <- parallel::mclapply(pairs.list, function(x){
-  ret <- NRAFdf[ , colnames(NRAFdf) %in% x ]
+  AFlist <- parallel::mclapply(pairs.list, function(x){
+    ret <- NRAFdf[ , colnames(NRAFdf) %in% x ]
+    return(ret)
+  }) # parse pairs out to list of AF matrices. Fast calc
+
+
+  dablist <- parallel::mclapply(AFlist, function(afmatpair){
+    pair <- colnames(afmatpair)
+    dabret <- dab(afmatpair)
+    dabret <- 1/nrow(dabret) * sum( (dabret * wiret), na.rm = T )
+
+    ret <- cbind.data.frame(pair[1], pair[2], dabret)
+    return(ret)
+
+  }) # end internal loop for DAB calculations
+
+  ### FINAL RETURN
+  ret <- do.call("rbind", dablist)
   return(ret)
-}) # parse pairs out to list of AF matrices. Fast calc
-
-
-dablist <- parallel::mclapply(AFlist, function(afmatpair){
-  pair <- colnames(afmatpair)
-  dabret <- dab(afmatpair)
-  dabret <- 1/length(dabret) * sum( (dabret * wiret) )
-
-  ret <- cbind.data.frame(pair[1], pair[2], dabret)
-  return(ret)
-
-}) # end internal loop for DAB calculations
-
-### FINAL RETURN
-ret <- do.call("rbind", dablist)
-return(ret)
 }
 
