@@ -154,4 +154,55 @@ vcfR2Fw_pairwisegendist <- function(vcfRobject = NULL, biallelicsnps=TRUE, segsi
   ### FINAL RETURN
   ret <- do.call("rbind", dablist)
   return(ret)
- }
+}
+
+
+
+
+
+#' @title NRAFlist2Fw_pairwisegendist
+#'
+#' @author Nick Brazeau
+#'
+#' @export
+
+
+
+# TODO eventually make this compatible with the end MIP output
+
+vcfR2Fw_pairwisegendist <- function(NRAFlist = NULL){
+
+# get the correlation matrix
+wi <- parallel::mclapply(NRAFlist, wicalc, window=50)
+#--------------------------------------------------------
+# calculations
+#--------------------------------------------------------
+
+# pairings
+pairs.list <- split(pairs, seq(nrow(pairs)))
+
+# just need a vector of the wi results
+wiret <- do.call("rbind", wi)$wi
+
+
+AFlist <- parallel::mclapply(pairs.list, function(x){
+  ret <- NRAF[ , colnames(NRAF) %in% x ]
+  return(ret)
+}) # parse pairs out to list of AF matrices. Fast calc
+
+
+dablist <- lapply(AFlist, function(afmatpair){
+  pair <- colnames(afmatpair)
+  dabret <- dab(afmatpair)
+  dabret <- 1/length(dabret) * sum( (dabret * wiret) )
+
+  ret <- cbind.data.frame(pair[1], pair[2], dabret)
+  return(ret)
+
+}) # end internal loop for DAB calculations
+
+### FINAL RETURN
+ret <- do.call("rbind", dablist)
+return(ret)
+}
+

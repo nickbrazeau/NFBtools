@@ -32,8 +32,8 @@ library(tidygraph)
 # download this file: 
 
 url <- "ftp://ngs.sanger.ac.uk/production/malaria/pf-crosses/1.0/3d7_hb3.combined.final.vcf.gz" 
-destfile <- "~/Desktop/temp/temp.vcf.gz"
-httr::GET(url=url, write_disk(path=destfile, overwrite = F))
+destfile <- "~/Downloads/temp.vcf.gz"
+httr::GET(url=url, httr::write_disk(path=destfile, overwrite = F))
 vcfRobject <- vcfR::read.vcfR(file=destfile)
 
 vcfRobject <- vcfRobject[vcfR::is.biallelic(vcfRobject)] # biallelic 
@@ -60,17 +60,7 @@ Cross experiment. Two parents. Different levels of relatedness -- nice test/use 
 **Of note, the LD weights here are going to be very strong since this is a one-generation cross. This approach is assuming random draws from a population, not meiotic siblings**.   
   
 
-## Subset to Parent and a few samples
-```{r subsetcrosssmpl, echo=T, warning=F, message=F, results="asis", fig.width=11, fig.height=8, dpi=300}
-
-vcfRobject <- vcfRobject[1:20, c("FORMAT", "3D7/PG0051-C/ERR019061", "HB3/PG0052-C/ERR019054", "C14/PG0060-C/ERR019058", "C01/PG0062-C/ERR019070")]
-plotObjlist <- NFBtools::vcfR2GTCov(vcfR = vcfRobject)
-# smaller plot now
-plot(plotObjlist$plot)
-
-
-```
-## Subset and Plot Chrom1&2 Cross Data Subset
+## Subset and Plot Chrom1 Cross Data Subset
 ```{r subsetcrossplot, echo=T, warning=F, message=F, results="asis", fig.width=11, fig.height=8, dpi=300}
 # two chromosomes to show that this parallelizes well 
 vcfRobject <- NFBtools::vcfR2SubsetChrom(vcfRobject = vcfRobject, chromvect = c("Pf3D7_01_v3"))
