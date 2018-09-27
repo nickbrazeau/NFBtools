@@ -15,6 +15,11 @@ dab <- function(afmat){
 #' @details Inspired by Bob Verity's corMat function
 
 wicalc <- function(NRAFdf, window=50){
+  # error handle
+  if(window > nrow(NRAFdf)){
+    stop("The smoothing window you have specified is larger than the number of SNPs you have on Chromosome", paste(NRAFdf$CHROM[1]))
+  }
+  # start
   cij <- NULL # init
   for(i in 1:nrow(NRAFdf)){
     LW <- i - window
