@@ -17,12 +17,7 @@ dab <- function(afmat){
 wicalc <- function(NRAFdf, window=50){
   # error handle
   if(window > nrow(NRAFdf)){
-<<<<<<< HEAD
-    stop("The smoothing window you have specified is larger than the number of SNPs you have on Chromosome ", paste(NRAFdf$CHROM[1]), ". Remember a window is centered a SNP and needs to be considered for i +/- L/2")
-=======
-    stop("The smoothing window you have specified is larger than the number of SNPs you have on Chromosome ", paste(NRAFdf$CHROM[1]) ".
-         Remember a window is centered a SNP and needs to be considered for i +/- L/2")
->>>>>>> master
+    stop("The smoothing window you have specified is larger than the number of SNPs you have on Chromosome ", paste(NRAFdf$CHROM[1]) ". Remember a window is centered a SNP and needs to be considered for i +/- L/2")
   }
   # start
   cij <- NULL # init
