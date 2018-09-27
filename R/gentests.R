@@ -149,7 +149,7 @@ vcfR2Fw_pairwisegendist <- function(vcfRobject = NULL, biallelicsnps=TRUE, segsi
   dablist <- lapply(AFlist, function(afmatpair){
     pair <- colnames(afmatpair)
     dabret <- dab(afmatpair)
-    dabret <- 1/nrow(dabret) * sum( (dabret * wiret), na.rm = T )
+    dabret <- 1/sum(!is.na(dabret)) * sum( (dabret * wiret), na.rm = T )
 
     ret <- cbind.data.frame(pair[1], pair[2], dabret)
     return(ret)
@@ -207,7 +207,7 @@ NRAFdf2Fw_pairwisegendist <- function(NRAFdf = NULL, window=50){
   dablist <- parallel::mclapply(AFlist, function(afmatpair){
     pair <- colnames(afmatpair)
     dabret <- dab(afmatpair)
-    dabret <- 1/nrow(dabret) * sum( (dabret * wiret), na.rm = T )
+    dabret <- 1/sum(!is.na(dabret)) * sum( (dabret * wiret), na.rm = T )
 
     ret <- cbind.data.frame(pair[1], pair[2], dabret)
     return(ret)
