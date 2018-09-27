@@ -175,13 +175,19 @@ vcfR2Fw_pairwisegendist <- function(vcfRobject = NULL, biallelicsnps=TRUE, segsi
 
 # TODO eventually make this compatible with the end MIP output
 
-NRAFlist2Fw_pairwisegendist <- function(NRAFlist = NULL, window=50){
+NRAFdf2Fw_pairwisegendist <- function(NRAFdf = NULL, window=50){
 
 # get the correlation matrix
 wi <- parallel::mclapply(NRAFlist, wicalc, window=window)
 #--------------------------------------------------------
 # calculations
 #--------------------------------------------------------
+NRAFlist <- split(NRAFdf, NRAFdf$CHROM)
+
+# get all pairs of samples
+pairs <- t(combn(
+  colnames(NRAFlist[[1]])[3:ncol(NRAFlist[[1]])], # just colnames of samples not chrom,pos
+  m=2)) # choose 2
 
 # pairings
 pairs.list <- split(pairs, seq(nrow(pairs)))
@@ -191,12 +197,12 @@ wiret <- do.call("rbind", wi)$wi
 
 
 AFlist <- parallel::mclapply(pairs.list, function(x){
-  ret <- NRAF[ , colnames(NRAF) %in% x ]
+  ret <- NRAFdf[ , colnames(NRAFdf) %in% x ]
   return(ret)
 }) # parse pairs out to list of AF matrices. Fast calc
 
 
-dablist <- lapply(AFlist, function(afmatpair){
+dablist <- parallel::mclapply(AFlist, function(afmatpair){
   pair <- colnames(afmatpair)
   dabret <- dab(afmatpair)
   dabret <- 1/length(dabret) * sum( (dabret * wiret) )
