@@ -20,7 +20,7 @@ wicalc <- function(NRAFdf, window=50){
     stop("The smoothing window you have specified is larger than the number of SNPs you have on Chromosome ", paste(NRAFdf$CHROM[1]), ". Remember a window is centered a SNP and needs to be considered for i +/- L/2")
   }
   # start
-  cij <- NULL # init
+  cij <- NULL # init, pos i and j -- compare pop AF for i and j
   for(i in 1:nrow(NRAFdf)){
     LW <- i - window
     UW <- i + window
@@ -43,7 +43,7 @@ wicalc <- function(NRAFdf, window=50){
     mu1 <- mean(x1,na.rm=TRUE)
     x2 <- unlist( NRAFdf[NRAFdf$POS == v[2], 3:ncol(NRAFdf)] )
     mu2 <- mean(x2,na.rm=TRUE)
-    r <- sum((x1-mu1)*(x2-mu2),na.rm=TRUE)/sqrt( sum((x1-mu1)^2,na.rm=TRUE)*sum((x2-mu2)^2,na.rm=TRUE) )
+    r <- sum((x1-mu1)*(x2-mu2), na.rm=TRUE)/sqrt( sum((x1-mu1)^2, na.rm=TRUE)*sum((x2-mu2)^2, na.rm=TRUE) )
     return(r)
   }
   )
@@ -178,8 +178,8 @@ vcfR2Fw_pairwisegendist <- function(vcfRobject = NULL, biallelicsnps=TRUE, segsi
 NRAFdf2Fw_pairwisegendist <- function(NRAFdf = NULL, window=50){
 
   # setup
-  colnames(NRAFdf)[1:2] <- tolower(colnames(NRAFdf)[1:2])
-  NRAFlist <- split(NRAFdf, NRAFdf$chrom)
+  colnames(NRAFdf)[1:2] <- toupper(colnames(NRAFdf)[1:2])
+  NRAFlist <- split(NRAFdf, NRAFdf$CHROM)
 
   # get the correlation matrix
   wi <- parallel::mclapply(NRAFlist, wicalc, window=window)
