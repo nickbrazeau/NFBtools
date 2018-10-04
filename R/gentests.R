@@ -178,7 +178,8 @@ vcfR2Fw_pairwisegendist <- function(vcfRobject = NULL, biallelicsnps=TRUE, segsi
 NRAFdf2Fw_pairwisegendist <- function(NRAFdf = NULL, window=50){
 
   # setup
-  NRAFlist <- split(NRAFdf, NRAFdf$CHROM)
+  colnames(NRAFdf)[1:2] <- tolower(colnames(NRAFdf)[1:2])
+  NRAFlist <- split(NRAFdf, NRAFdf$chrom)
 
   # get the correlation matrix
   wi <- parallel::mclapply(NRAFlist, wicalc, window=window)
