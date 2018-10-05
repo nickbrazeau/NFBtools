@@ -1,12 +1,12 @@
 
 
 #------------------------------------------------
-#' @title tidy polyIBD sim as snpdf
+#' @title Plot polyIBD sim as gtcov mat
 #' @details this is temporary
 #'
 #' @export
 
-polyIBDsim2snpdf <- function(polyIBDsim){
+polyIBDsim2GTcov <- function(polyIBDsim){
 
   haploid1 <- data.frame(polyIBDsim$haploid$haploid1)
   colnames(haploid1) <- c(paste0("Smpl1_Haplotype", seq(1, ncol(haploid1))))
@@ -41,19 +41,8 @@ polyIBDsim2snpdf <- function(polyIBDsim){
 
   snpdflist <- lapply(snpdflist, lagPOS)
   snpdf <- snpdflist %>% bind_rows
-}
 
-
-
-#------------------------------------------------
-#' @title Plot polyIBD sim as gtcov mat
-#' @details this is temporary
-#'
-#' @export
-
-
-polyIBDsimsnpdf2GTcov <- function(snpdf){
-plot <- snpdf %>%
+  plotobj <- snpdf %>%
     ggplot() +
     geom_rect(mapping=aes(xmin=start, xmax=end, ymin=paramindex-0.49, ymax=paramindex+0.49, fill=GTfact)) +
     scale_y_continuous(breaks = min(snpdf$paramindex):max(snpdf$paramindex),
@@ -69,7 +58,10 @@ plot <- snpdf %>%
           axis.text.y = element_text(size=12, face="bold", family = "Arial")
     )
 
-  return(plot)
+
+  retlist = list(snpdflist = snpdflist,
+                 plot = plotobj)
+  return(retlist)
 
 }
 
