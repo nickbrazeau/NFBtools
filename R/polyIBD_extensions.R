@@ -1,7 +1,7 @@
 
 
 #------------------------------------------------
-#' @title Plot polyIBD sim as gtcov mat
+#' @title tidy polyIBD sim as snpdf
 #' @details this is temporary
 #'
 #' @export
