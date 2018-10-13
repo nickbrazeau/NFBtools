@@ -8,21 +8,20 @@
 
 polyIBDsim2GTcov <- function(polyIBDsim){
 
-  haploid1 <- data.frame(polyIBDsim$haploid$haploid1)
-  colnames(haploid1) <- c(paste0("Smpl1_Haplotype", seq(1, ncol(haploid1))))
-  haploid2 <- data.frame(polyIBDsim$haploid$haploid2)
-  colnames(haploid2) <- c(paste0("Smpl2_Haplotype", seq(1, ncol(haploid1))))
-  IBD <- data.frame(polyIBDsim$IBD)
-  IBD[IBD == 0] <- "U"
-  IBD[IBD == 1] <- "I"
-  colnames(IBD) <- c(paste0("HaploPair_IBD", seq(1, ncol(haploid1))))
+  haplotype1 <- data.frame(polyIBDsim$SampleHaplotypes$Sample1)
+  colnames(haplotype1) <- paste0("Smpl1_", colnames(haplotype1))
+  haplotype2 <- data.frame(polyIBDsim$SampleHaplotypes$Sample2)
+  colnames(haplotype2) <- paste0("Smpl2_", colnames(haplotype2))
+  IBDbs <- data.frame(polyIBDsim$IBDbs)
+  IBDbs[IBDbs == 0] <- "U"
+  IBDbs[IBDbs == 1] <- "I"
 
   snpdf <- cbind.data.frame(CHROM = polyIBDsim$CHROMPOS$CHROM,
                             POS = polyIBDsim$CHROMPOS$POS,
                             polyIBDsim$gtmatrix,
-                            haploid1,
-                            haploid2,
-                            IBD)
+                            haplotype1,
+                            haplotype2,
+                            IBDbs)
   snpdf <- snpdf %>%
     tibble::as.tibble(.) %>%
     tidyr::gather(key="param", value="GT", 3:ncol(snpdf)) %>%
