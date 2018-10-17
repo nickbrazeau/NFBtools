@@ -175,7 +175,7 @@ SeekDeepDat2ExonAnnotation <- function(input,
   #####     REFERNET FASTA     #######
   ####################################
   ampliconrefseq <- Biostrings::readDNAStringSet(filepath = ampliconrefseqpath, format="fasta")
-  ampliconrefseq <- ampliconrefseq[grepl("Pf3d7", names(ampliconrefseq))]
+  ampliconrefseq <- ampliconrefseq[grepl("pf3d7", tolower(names(ampliconrefseq)))]
 
 
   ############################################
@@ -187,6 +187,12 @@ SeekDeepDat2ExonAnnotation <- function(input,
   Pf3D7haplotypeRef <- Biostrings::trimLRPatterns(Lpattern = Lprimer[[1]],
                                                   Rpattern = Rprimer[[1]],
                                                   subject = ampliconrefseq)  # trim off primers
+  ### SANITY CHECK
+  ampliconfull <- ampliconrefseq@ranges@width
+  ampliconprimertrim <- ampliconfull - Rprimer@ranges@width - Lprimer@ranges@width
+  if(ampliconprimertrim != Pf3D7haplotypeRef@ranges@width){
+    stop("The amplicon and haplotype are of different lengths. There was an issue in primer triming. Check your primers.")
+  }
 
   #### THIS IS NOW THE REFERENT HAPLOTYPE (primers trimmed that we can compare/align to for variants)
 
@@ -223,19 +229,9 @@ SeekDeepDat2ExonAnnotation <- function(input,
                                   subject = DNAString(seqinr::c2s(gffseq[[1]]))) # find pos of amplicon in gene
 
 
-    ### SANITY CHECK
-    ampliconfull <- ampliconrefseq@ranges@width
-    ampliconprimertrim <- ampliconfull - Rprimer@ranges@width - Lprimer@ranges@width
-    if(ampliconprimertrim != Pf3D7haplotypeRef@ranges@width){
-      stop("The amplicon and haplotype are of different lengths. There was an issue in primer triming. See primer trim in code")
-    }
-
-
-
-    if(geneid.gff$strand == "+"){
       # find starting gene pos
       skdpconsens_SNP$GenePos <- skdpconsens_SNP$SNPpos + RefSeqGenePos@ranges@start - 1 # minus one here so the first base doesn't get counted twice in our amp count and our vcf count
-      # Referent Amplicon w/in Gene
+      # Referent Amplicon w/in Gene (from the GFF gene-specific fasta sequence, the strand orientation is already taken care of)
       AArefseq <- seqinr::translate(gffseq[[1]], sens="F", numcode=ncbigeneticcode)
       # Make Mutant Amplicon Haplotype
       haplist <- split(skdpconsens_SNP, f=factor(skdpconsens_SNP$h_popUID))
@@ -253,30 +249,6 @@ SeekDeepDat2ExonAnnotation <- function(input,
       }
       skdpconsens_SNP <- do.call("rbind", lapply(haplist, mutatehap_possense))
 
-    }else if(geneid.gff$strand == "-"){
-      # find starting gene pos
-      skdpconsens_SNP$GenePos <- (RefSeqGenePos@ranges@start+RefSeqGenePos@ranges@width) - skdpconsens_SNP$SNPpos - 1 # minus one here so the first base doesn't get counted twice in our amp count and our vcf count
-      # Referent Amplicon w/in Gene
-      AArefseq <- seqinr::translate(gffseq[[1]], sens="F", numcode=ncbigeneticcode)
-      # Make Mutant Amplicon Haplotype
-      haplist <- split(skdpconsens_SNP, f=factor(skdpconsens_SNP$h_popUID))
-
-      mutatehap_possense <- function(haplistobj){
-        mutseq <- gffseq[[1]]
-        mutseq[haplistobj$GenePos] <- as.character(haplistobj$SNP) # make mutation seq by putting in all SNPs
-        AAmutseq <- seqinr::translate(mutseq, sens="R", numcode=ncbigeneticcode) # translate
-
-        haplistobj$CODON <- ceiling(haplistobj$GenePos/3) # ceiling will so that 1/3, 2/3, 3/3 all got to #1 CODON
-        haplistobj$AAREF <- AArefseq[haplistobj$CODON]
-        haplistobj$AAALT <- AAmutseq[haplistobj$CODON]
-        haplistobj$MUT_Type <- ifelse(haplistobj$AAREF == haplistobj$AAALT, "Syn", "Nonsyn")
-        return(haplistobj)
-      }
-      skdpconsens_SNP <- do.call("rbind", lapply(haplist, mutatehap_possense))
-
-    } else {
-      stop("Error parsing vcf. Does not contain strand information")
-    }
 
     # return
     skdpvcf <- dplyr::left_join(input, skdpconsens_SNP, by=c("h_popUID"))
