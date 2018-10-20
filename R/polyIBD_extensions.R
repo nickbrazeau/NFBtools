@@ -12,6 +12,15 @@ polyIBDsim2GTcov <- function(polyIBDsim){
   colnames(haplotype1) <- paste0("Smpl1_", colnames(haplotype1))
   haplotype2 <- data.frame(polyIBDsim$SampleHaplotypes$Sample2)
   colnames(haplotype2) <- paste0("Smpl2_", colnames(haplotype2))
+
+  IBDws_sample1 <- data.frame(polyIBDsim$IBDws$Sample1)
+  IBDws_sample1[IBDws_sample1 == 0] <- "U"
+  IBDws_sample1[IBDws_sample1 == 1] <- "I"
+
+  IBDws_sample2 <- data.frame(polyIBDsim$IBDws$Sample2)
+  IBDws_sample2[IBDws_sample2 == 0] <- "U"
+  IBDws_sample2[IBDws_sample2 == 1] <- "I"
+
   IBDbs <- data.frame(polyIBDsim$IBDbs)
   IBDbs[IBDbs == 0] <- "U"
   IBDbs[IBDbs == 1] <- "I"
@@ -21,6 +30,8 @@ polyIBDsim2GTcov <- function(polyIBDsim){
                             polyIBDsim$gtmatrix,
                             haplotype1,
                             haplotype2,
+                            IBDws_sample1,
+                            IBDws_sample2,
                             IBDbs)
   snpdf <- snpdf %>%
     tibble::as.tibble(.) %>%
