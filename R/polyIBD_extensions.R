@@ -4,9 +4,28 @@
 #' @title Plot polyIBD sim as gtcov mat
 #' @details this is temporary
 #'
+#' @importFrom magrittr %>%
+#'
 #' @export
 
 polyIBDsim2GTcov <- function(polyIBDsim){
+
+  if(any(sapply(polyIBDsim$IBDws, is.null))){
+
+    if(is.null(polyIBDsim$IBDws$Sample1)){
+
+      polyIBDsim$IBDws$Sample1 <- NA
+
+    }
+
+    if(is.null(polyIBDsim$IBDws$Sample2)){
+
+      polyIBDsim$IBDws$Sample2 <- NA
+
+    }
+
+
+  }
 
   haplotype1 <- data.frame(polyIBDsim$SampleHaplotypes$Sample1)
   colnames(haplotype1) <- paste0("Smpl1_", colnames(haplotype1))
@@ -67,6 +86,7 @@ polyIBDsim2GTcov <- function(polyIBDsim){
           axis.title.y = element_text(size=14, face="bold", family = "Arial"),
           axis.text.y = element_text(size=12, face="bold", family = "Arial")
     )
+
 
 
   retlist = list(snpdflist = snpdflist,
