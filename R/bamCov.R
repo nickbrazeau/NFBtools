@@ -248,7 +248,7 @@ bamCov2SmplPercCov <- function(chromlistcovpercdf = NULL){
 
 
 bamCov2SmplChromCov <- function(genomcoords = NULL, windowcov = NULL){
-  genomcoordsdf <- genomcoordsdf %>%
+  genomcoordsdf <- genomcoords %>%
     dplyr::filter(CHROM != "genome") %>%
     dplyr::arrange(end) %>%
     dplyr::mutate(CHROM_num = seq(1:length(CHROM)))  # hacky on purpose
