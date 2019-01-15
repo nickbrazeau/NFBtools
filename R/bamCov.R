@@ -26,7 +26,7 @@ bedtoolsgenomecov2bamCov <- function(gencovdir = NULL, lvls = c(1,5,10,25,50,75,
 
   gencovfiles <- dir(gencovdir, full.names = T)
 
-  retlist_all <- parallel::mclapply(gencovfiles, function(file){
+  retlist_all <- lapply(gencovfiles, function(file){
     dat <- readr::read_tsv(file, col_names = F)
     colnames(dat) <- c("CHROM", "POS", "depth")
     datchromlist <- split(x = dat, f=factor(dat$CHROM))
@@ -62,7 +62,7 @@ bedtoolsgenomecov2bamCov <- function(gencovdir = NULL, lvls = c(1,5,10,25,50,75,
       return(windowcov)
   }
 
-  windowcov <- parallel::mclapply(datchromlist, windowfunctioncalculator)
+  windowcov <- lapply(datchromlist, windowfunctioncalculator)
   windowcov <- do.call("rbind.data.frame", windowcov)
 
   # store the bp window used
@@ -103,7 +103,7 @@ bedtoolsgenomecov2bamCov <- function(gencovdir = NULL, lvls = c(1,5,10,25,50,75,
       )
 
     ## Percentage of Chromosome Covered by levels
-    chromlistcovperc <- parallel::mclapply(datchromlist,
+    chromlistcovperc <- lapply(datchromlist,
                                            function(df){
                                              chrombp = nrow(df)
                                              ret <- sapply(lvls, calcCovperc, depth=df$depth, ttlbp=chrombp)
@@ -247,7 +247,7 @@ bamCov2SmplPercCov <- function(chromlistcovpercdf = NULL){
 #'
 
 
-bamCov2SmplChromCov <- function(genomcoordsdf = NULL, windowcov = NULL){
+bamCov2SmplChromCov <- function(genomcoords = NULL, windowcov = NULL){
   genomcoordsdf <- genomcoordsdf %>%
     dplyr::filter(CHROM != "genome") %>%
     dplyr::arrange(end) %>%
@@ -315,7 +315,7 @@ bamCov2SmplRaster <- function(input=NULL){
   smpls <- names(windowcovlist)
 
   SmplPercCovlist <- lapply(chromlistcovperclist, bamCov2SmplPercCov)
-  SmplChromCovlist <- mapply(bamCov2SmplChromCov, genomcoordsdf = genomcoordslist, windowcovdf = windowcovlist, SIMPLIFY = F)
+  SmplChromCovlist <- mapply(bamCov2SmplChromCov, genomcoords = genomcoordslist, windowcov = windowcovlist, SIMPLIFY = F)
 
 
 
