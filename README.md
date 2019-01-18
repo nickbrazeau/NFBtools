@@ -5,7 +5,7 @@
 
 ## Purpose 
   
-R package that contains miscellanious tools used by the IDEEL@UNC group and developed by Nick Brazeau. **Please use at your own risk as corner cases will often have not been vetted.**
+R package that contains miscellanious tools used by the IDEEL@UNC group and developed by Nick Brazeau. However, in an effort to increase modularization and better group ownership, I have moved this to `IDEELResearch` as a few separate repositories. Better documentation and tutorials are found there (12/2018). 
   
 
 ## Installation 
